@@ -17,8 +17,10 @@ app = FastAPI()
 # -------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # allow local UI
-    allow_credentials=True,
+    allow_origins=[
+        "https://shine-l.netlify.app"
+    ],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
