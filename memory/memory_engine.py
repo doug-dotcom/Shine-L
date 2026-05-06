@@ -16,7 +16,7 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 client = OpenAI()
 
 # 🔥 LOCKED PATH (no more path issues)
-BASE = r"C:\Shine_L\memory"
+BASE = r"memory"
 
 
 FILES = {
