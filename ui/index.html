@@ -7,7 +7,6 @@
 <title>Shine L</title>
 
 <style>
-
 *{
     box-sizing:border-box;
     margin:0;
@@ -18,17 +17,18 @@ body{
     font-family:Arial, sans-serif;
     background:linear-gradient(135deg,#0f172a,#1e3a5f);
     color:white;
-    height:100vh;
-    overflow:hidden;
+    min-height:100vh;
+    overflow:auto;
 }
 
 .container{
     display:flex;
     flex-direction:column;
-    height:100vh;
+    min-height:100vh;
     width:100%;
     max-width:900px;
     margin:auto;
+    padding-bottom:8px;
 }
 
 .header{
@@ -46,6 +46,7 @@ body{
     margin:0 12px 12px 12px;
     font-size:20px;
     line-height:1.6;
+    min-height:60vh;
 }
 
 .message{
@@ -69,6 +70,8 @@ body{
     gap:10px;
     padding:12px;
     background:rgba(0,0,0,0.2);
+    position:sticky;
+    bottom:0;
 }
 
 input{
@@ -78,6 +81,7 @@ input{
     border-radius:12px;
     font-size:18px;
     outline:none;
+    min-width:0;
 }
 
 button{
@@ -98,14 +102,20 @@ button:active{
 @media(max-width:600px){
 
     .header{
-        font-size:28px;
-        padding:16px;
+        font-size:36px;
+        padding:20px 18px;
     }
 
     .chat-box{
         font-size:18px;
         margin:0 8px 8px 8px;
         padding:16px;
+        min-height:62vh;
+    }
+
+    .input-row{
+        padding:10px;
+        padding-bottom:calc(10px + env(safe-area-inset-bottom));
     }
 
     input{
@@ -118,7 +128,6 @@ button:active{
         padding:14px 18px;
     }
 }
-
 </style>
 </head>
 
@@ -140,24 +149,17 @@ button:active{
 </div>
 
 <script>
-
 function addMessage(sender, text){
-
     const chat = document.getElementById("chat");
-
     const div = document.createElement("div");
-
     div.className = "message";
 
     if(sender === "You"){
-
         div.innerHTML = `
             <div class="user">You:</div>
             <div>${text}</div>
         `;
-
     }else{
-
         div.innerHTML = `
             <div class="bot">L:</div>
             <div>${text}</div>
@@ -165,24 +167,19 @@ function addMessage(sender, text){
     }
 
     chat.appendChild(div);
-
     chat.scrollTop = chat.scrollHeight;
 }
 
 async function sendMessage(){
-
     const input = document.getElementById("input");
-
     const message = input.value.trim();
 
     if(!message) return;
 
     addMessage("You", message);
-
     input.value = "";
 
     try{
-
         const res = await fetch(
             "https://shine-l-production.up.railway.app/chat",
             {
@@ -191,16 +188,14 @@ async function sendMessage(){
                     "Content-Type":"application/json"
                 },
                 body:JSON.stringify({
-                    message: message
+                    message:message
                 })
             }
         );
 
         if(!res.ok){
-
-            throw new Error(
-                "Server error: " + res.status
-            );
+            const text = await res.text();
+            throw new Error(text);
         }
 
         const data = await res.json();
@@ -211,9 +206,7 @@ async function sendMessage(){
         );
 
     }catch(err){
-
-        console.error(err);
-
+        console.error("FULL ERROR:", err);
         addMessage(
             "L",
             "Connection issue talking to Ellie."
@@ -224,13 +217,10 @@ async function sendMessage(){
 document
 .getElementById("input")
 .addEventListener("keydown", function(e){
-
     if(e.key === "Enter"){
-
         sendMessage();
     }
 });
-
 </script>
 
 </body>
