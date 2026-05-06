@@ -74,7 +74,7 @@ async function sendMessage() {
 
     addMessage("You", message);
 
-    const res = await fetch("http://127.0.0.1:8000/chat", {
+    const res = await fetch("https://shine-l-production.up.railway.app/chat", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
