@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from openai import OpenAI
 from fastapi.middleware.cors import CORSMiddleware
+load_dotenv()
 
 # 👉 Ellie (memory brain)
 from memory.memory_engine import process, build_context, detect_emotional_state, generate_emotional_tone
