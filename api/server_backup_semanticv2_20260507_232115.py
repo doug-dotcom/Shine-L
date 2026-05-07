@@ -157,14 +157,6 @@ def search_life_story(query):
 
         query_lower = query.lower()
 
-        search_terms = [query_lower]
-
-        for key, linked_terms in SEMANTIC_LINKS.items():
-
-            if key in query_lower:
-
-                search_terms.extend(linked_terms)
-
         for item in data:
 
             text_blob = (
@@ -172,24 +164,9 @@ def search_life_story(query):
                 str(item.get("content",""))
             ).lower()
 
-            score = 0
-
-            for term in search_terms:
-
-                if term in text_blob:
-                    score += 1
-
-            if score > 0:
-
-                item["_score"] = score
+            if query_lower in text_blob:
 
                 matches.append(item)
-
-        matches = sorted(
-            matches,
-            key=lambda x: x["_score"],
-            reverse=True
-        )
 
         return matches[:5]
 
@@ -406,5 +383,4 @@ async def recall_story(req: ChatRequest):
     return {
         "reply": summary
     }
-
 
