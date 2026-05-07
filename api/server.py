@@ -1,20 +1,50 @@
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai import OpenAI
-from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi import UploadFile, File
-import shutil
 import os
-import fitz
-import base64
 import json
+import shutil
+import base64
+import fitz
+
+from memory.memory_engine import (
+    process,
+    build_context,
+    detect_emotional_state,
+    generate_emotional_tone,
+)
 
 load_dotenv()
 
-DRIFT_TRIGGERS = [
+print("USING CLEAN SHINE L SERVER V2")
 
+app = FastAPI()
+client = OpenAI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://shine-l.netlify.app"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+UPLOAD_DIR = "uploads"
+LIFE_STORY_FILE = "memory/life_story.json"
+PROFILE_FILE = "memory/profile.json"
+
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs("memory", exist_ok=True)
+
+
+class ChatRequest(BaseModel):
+    message: str
+
+
+DRIFT_TRIGGERS = [
     "confused",
     "overwhelmed",
     "lost",
@@ -25,276 +55,134 @@ DRIFT_TRIGGERS = [
     "reset",
     "spiraling",
     "panic",
-    "anxious"
-
+    "anxious",
 ]
 
 GROUNDING_RESPONSE = """
-
 Doug may be drifting or overwhelmed.
 
 Slow down.
-
 Reduce information density.
-
-Use:
-- shorter sections
-- calm pacing
-- clear structure
-- emotional grounding
-- step-by-step guidance
-
-Prioritize:
-clarity,
-safety,
-orientation,
-and next action.
-
+Use short sections.
+Use calm pacing.
+Use clear next steps.
+Prioritize clarity, safety, orientation, and one next action.
 """
 
-# 👉 Ellie (memory brain)
-from memory.memory_engine import process, build_context, detect_emotional_state, generate_emotional_tone
+MEMORY_IMPORTANCE = {
+    "kids": 10,
+    "children": 10,
+    "iyla": 10,
+    "ashton": 10,
+    "luella": 10,
+    "mehlia": 10,
+    "army": 9,
+    "east timor": 10,
+    "kapooka": 9,
+    "deployment": 9,
+    "recovery": 10,
+    "na": 10,
+    "aa": 10,
+    "stepwork": 9,
+    "shine": 10,
+    "purpose": 9,
+    "identity": 8,
+    "trauma": 9,
+    "family": 10,
+    "clarity": 8,
+}
 
-# 🔥 CONFIRM CORRECT FILE IS RUNNING
-print("🚀 USING CORRECT SERVER.PY")
-
-app = FastAPI()
-
-# -------------------------
-# CORS (UI FIX)
-# -------------------------
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "https://shine-l.netlify.app"
+SEMANTIC_LINKS = {
+    "east timor": [
+        "army",
+        "kapooka",
+        "transport",
+        "military",
+        "enlistment",
+        "deployment",
+        "reserve scheme",
+        "timor",
     ],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-client = OpenAI()
-
-# -------------------------
-# REQUEST MODEL
-# -------------------------
-class ChatRequest(BaseModel):
-    message: str
-
-# -------------------------
-# CHAT ENDPOINT
-# -------------------------
-@app.post("/chat")
-async def chat(req: ChatRequest):
-    user_msg = req.message
-
-    # ==========================================
-    # INTENT DETECTION
-    # ==========================================
-
-    intent = detect_intent(user_msg)
-
-    # ==========================================
-    # FULL FILE RECALL
-    # ==========================================
-
-    if intent == "full_recall":
-
-        matches = search_life_story(user_msg)
-
-        if len(matches) == 0:
-
-            return {
-                "reply":"I could not find a matching full file in memory."
-            }
-
-        response_text = ""
-
-        for item in matches:
-
-            response_text += (
-                "\n\n====================\n"
-                + item.get("title","")
-                + "\n====================\n\n"
-                + item.get("full_content","")
-            )
-
-        return {
-            "reply": response_text
-        }
-
-    # ==========================================
-    # MEMORY RECALL
-    # ==========================================
-
-    if intent == "memory_recall":
-
-        matches = search_life_story(user_msg)
-
-        if len(matches) > 0:
-
-            memory_context = ""
-
-            for item in matches:
-
-                memory_context += (
-                    "\n\nMEMORY:\n"
-                    + item.get("preview","")
-                )
-
-            system_prompt += memory_context
-
-    print("\n🟡 USER MESSAGE:", user_msg)
-
-
-    # ==========================================
-    # LOAD CANONICAL PROFILE
-    # ==========================================
-
-    profile = load_profile()
-
-    profile_context = ""
-
-    if profile:
-
-        profile_context += (
-            "\n\nCANONICAL PROFILE MEMORY:\n"
-            + json.dumps(profile, indent=2)
-        )
-
-        system_prompt += profile_context
-
-
-
-    # 🧠 STEP 1 — store memory
-    process(user_msg)
-
-    # 🧠 STEP 2 — build memory context
-    memory_context = build_context()
-    state = detect_emotional_state(user_msg)
-    tone = generate_emotional_tone(state)
-
-    print("\n🧠 MEMORY CONTEXT:\n", memory_context)
-
-    system_prompt = f"""
-You are L, a personal assistant with persistent memory.
-
-Here is everything you know about the user:
-
-{memory_context}
-
-Tone instruction:
-{tone}
-
-Instructions:
-- ALWAYS use the memory above when answering
-- If the answer is clearly in memory, answer confidently
-- Do NOT say you don't know if it exists in memory
-- Be calm, direct, and helpful
-"""
-
-    # =====================================================
-    # STORY MEMORY SEARCH
-    # =====================================================
-
-    story_matches = search_life_story(user_msg)
-
-    # ==============================================
-    # DRIFT DETECTION
-    # ==============================================
-
-    if detect_drift(user_msg):
-
-        system_prompt += GROUNDING_RESPONSE
-
-    story_context = ""
-
-    if len(story_matches) > 0:
-
-        for item in story_matches:
-
-            story_context += (
-                "\n\nSTORY MEMORY:\n" +
-                item.get("preview","")
-            )
-
-    system_prompt += story_context
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_msg}
-        ]
-    )
-
-    reply = response.choices[0].message.content
-
-    print("\n🟢 L RESPONSE:", reply)
-
-    return {"reply": reply}
-
-# -------------------------
-# HEALTH CHECK
-# -------------------------
-@app.get("/")
-def root():
-    return {
-        "status": "L SERVER RUNNING",
-        "memory": "Ellie connected",
-        "cors": "enabled"
-    }
-
-
-
-
-# =========================================================
-# FILE UPLOAD ENDPOINT
-# =========================================================
-
-UPLOAD_DIR = "uploads"
-
-LIFE_STORY_FILE = "memory/life_story.json"
-PROFILE_FILE = "memory/profile.json"
-
-
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-
-
-
-
-
-
-def load_profile():
-
+    "army": [
+        "kapooka",
+        "east timor",
+        "transport corps",
+        "deployment",
+        "reserve scheme",
+        "military",
+    ],
+    "school": [
+        "girls",
+        "childhood",
+        "grade",
+        "growing up",
+        "teenage",
+        "adolescence",
+    ],
+    "recovery": [
+        "na",
+        "aa",
+        "meetings",
+        "addiction",
+        "stepwork",
+        "sobriety",
+        "clean",
+    ],
+    "family": [
+        "kids",
+        "children",
+        "mehlia",
+        "luella",
+        "iyla",
+        "ashton",
+    ],
+}
+
+
+def safe_load_json(path, fallback):
     try:
+        if not os.path.exists(path):
+            return fallback
 
-        if not os.path.exists(PROFILE_FILE):
-
-            return {}
-
-        with open(
-            PROFILE_FILE,
-            "r",
-            encoding="utf-8"
-        ) as f:
-
+        with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
 
     except Exception as e:
+        print("JSON LOAD ERROR:", path, e)
+        return fallback
 
-        print("PROFILE LOAD ERROR:", e)
 
-        return {}
+def safe_save_json(path, data):
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
+    except Exception as e:
+        print("JSON SAVE ERROR:", path, e)
+
+
+def load_profile():
+    return safe_load_json(PROFILE_FILE, {})
+
+
+def calculate_memory_score(text):
+    score = 0
+    text_lower = text.lower()
+
+    for key, value in MEMORY_IMPORTANCE.items():
+        if key in text_lower:
+            score += value
+
+    return score
+
+
+def detect_drift(user_text):
+    text = user_text.lower()
+    return any(trigger in text for trigger in DRIFT_TRIGGERS)
+
 
 def detect_intent(user_text):
-
     text = user_text.lower()
-
-    # ==========================================
-    # FULL FILE RECALL
-    # ==========================================
 
     if (
         "full file" in text
@@ -302,175 +190,210 @@ def detect_intent(user_text):
         or "read full" in text
         or "show full" in text
         or "word for word" in text
+        or "read the full" in text
+        or "full story" in text
     ):
-
         return "full_recall"
-
-    # ==========================================
-    # MEMORY RECALL
-    # ==========================================
 
     if (
         "remember" in text
         or "recall" in text
         or "what do you know" in text
         or "tell me about" in text
+        or "what matters" in text
     ):
-
         return "memory_recall"
-
-    # ==========================================
-    # NORMAL CHAT
-    # ==========================================
 
     return "normal"
 
-def detect_drift(user_text):
 
-    text_lower = user_text.lower()
+def expand_search_terms(query):
+    query_lower = query.lower()
+    terms = [query_lower]
 
-    for trigger in DRIFT_TRIGGERS:
+    words = query_lower.replace("?", "").replace(".", "").split()
+    terms.extend(words)
 
-        if trigger in text_lower:
+    for key, linked_terms in SEMANTIC_LINKS.items():
+        if key in query_lower:
+            terms.extend(linked_terms)
 
-            return True
+    return list(set([t.strip() for t in terms if t.strip()]))
 
-    return False
-
-def calculate_memory_score(text):
-
-    score = 0
-
-    text_lower = text.lower()
-
-    for key, value in MEMORY_IMPORTANCE.items():
-
-        if key in text_lower:
-
-            score += value
-
-    return score
 
 def search_life_story(query):
+    stories = safe_load_json(LIFE_STORY_FILE, [])
 
-    try:
-
-        if not os.path.exists(LIFE_STORY_FILE):
-            return []
-
-        with open(
-            LIFE_STORY_FILE,
-            "r",
-            encoding="utf-8"
-        ) as f:
-
-            data = json.load(f)
-
-        matches = []
-
-        query_lower = query.lower()
-
-        search_terms = [query_lower]
-
-        for key, linked_terms in SEMANTIC_LINKS.items():
-
-            if key in query_lower:
-
-                search_terms.extend(linked_terms)
-
-        for item in data:
-
-            text_blob = (
-                str(item.get("title","")) + " " +
-                str(item.get("content",""))
-            ).lower()
-
-            score = 0
-
-            for term in search_terms:
-
-                if term in text_blob:
-                    score += 1
-
-            if score > 0:
-
-                final_score = (
-                    score +
-                    item.get("score",0)
-                )
-
-                item["_score"] = final_score
-
-                matches.append(item)
-
-        matches = sorted(
-            matches,
-            key=lambda x: x["_score"],
-            reverse=True
-        )
-
-        return matches[:5]
-
-    except Exception as e:
-
-        print("SEARCH ERROR:", e)
-
+    if not isinstance(stories, list):
         return []
 
-def save_to_life_story(title, content_text):
+    search_terms = expand_search_terms(query)
+    matches = []
 
-    try:
-
-        if os.path.exists(LIFE_STORY_FILE):
-
-            with open(
-                LIFE_STORY_FILE,
-                "r",
-                encoding="utf-8"
-            ) as f:
-
-                data = json.load(f)
-
-        else:
-
-            data = []
-
-        memory_score = calculate_memory_score(
-            content_text
+    for item in stories:
+        title = str(item.get("title", ""))
+        preview = str(item.get("preview", ""))
+        full_content = str(
+            item.get("full_content", item.get("content", ""))
         )
 
-        preview_text = content_text[:3000]
+        text_blob = f"{title} {preview} {full_content}".lower()
 
-        entry = {
-            "title": title,
-            "preview": preview_text,
-            "full_content": content_text,
-            "score": memory_score
-        }
+        score = 0
 
-        data.append(entry)
+        for term in search_terms:
+            if term in text_blob:
+                score += 1
 
-        with open(
-            LIFE_STORY_FILE,
-            "w",
-            encoding="utf-8"
-        ) as f:
+        score += int(item.get("score", 0))
 
-            json.dump(
-                data,
-                f,
-                indent=2,
-                ensure_ascii=False
+        if score > 0:
+            copy_item = dict(item)
+            copy_item["_score"] = score
+            matches.append(copy_item)
+
+    matches.sort(key=lambda x: x.get("_score", 0), reverse=True)
+
+    return matches[:5]
+
+
+def save_to_life_story(title, content_text):
+    stories = safe_load_json(LIFE_STORY_FILE, [])
+
+    if not isinstance(stories, list):
+        stories = []
+
+    preview_text = content_text[:3000]
+    memory_score = calculate_memory_score(content_text)
+
+    entry = {
+        "title": title,
+        "preview": preview_text,
+        "full_content": content_text,
+        "score": memory_score,
+    }
+
+    stories.append(entry)
+    safe_save_json(LIFE_STORY_FILE, stories)
+
+
+def build_profile_context():
+    profile = load_profile()
+
+    if not profile:
+        return ""
+
+    return "\n\nCANONICAL PROFILE MEMORY:\n" + json.dumps(
+        profile,
+        indent=2,
+        ensure_ascii=False,
+    )
+
+
+def build_story_context(user_msg):
+    matches = search_life_story(user_msg)
+
+    if not matches:
+        return ""
+
+    story_context = "\n\nRELEVANT STORY MEMORY:\n"
+
+    for item in matches:
+        story_context += "\n--- STORY MEMORY ---\n"
+        story_context += item.get("preview", "")
+
+    return story_context
+
+
+@app.get("/")
+def root():
+    return {
+        "status": "L SERVER RUNNING",
+        "version": "clean-server-v2",
+        "memory": "connected",
+        "cors": "enabled",
+    }
+
+
+@app.post("/chat")
+async def chat(req: ChatRequest):
+    user_msg = req.message
+    print("\nUSER MESSAGE:", user_msg)
+
+    intent = detect_intent(user_msg)
+
+    if intent == "full_recall":
+        matches = search_life_story(user_msg)
+
+        if not matches:
+            return {
+                "reply": "I could not find a matching full story file in memory."
+            }
+
+        response_text = ""
+
+        for item in matches:
+            response_text += (
+                "\n\n====================\n"
+                + item.get("title", "Untitled")
+                + "\n====================\n\n"
+                + item.get("full_content", item.get("preview", ""))
             )
 
-    except Exception as e:
+        return {"reply": response_text}
 
-        print("LIFE STORY SAVE ERROR:", e)
+    process(user_msg)
+
+    memory_context = build_context()
+    state = detect_emotional_state(user_msg)
+    tone = generate_emotional_tone(state)
+
+    system_prompt = f"""
+You are L, Doug's personal AI companion.
+
+You have persistent memory.
+
+Here is the current memory context:
+
+{memory_context}
+
+Tone instruction:
+{tone}
+
+Instructions:
+- Use memory when answering.
+- Use canonical profile facts as the highest authority.
+- If the user asks about their children, answer from canonical profile first.
+- If story memory is provided, use it.
+- Do not claim you cannot access memory if memory context is provided.
+- Be calm, clear, warm, and direct.
+"""
+
+    system_prompt += build_profile_context()
+
+    if intent == "memory_recall":
+        system_prompt += build_story_context(user_msg)
+
+    if detect_drift(user_msg):
+        system_prompt += GROUNDING_RESPONSE
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_msg},
+        ],
+    )
+
+    reply = response.choices[0].message.content
+
+    print("\nL RESPONSE:", reply)
+
+    return {"reply": reply}
 
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-
     file_path = os.path.join(UPLOAD_DIR, file.filename)
 
     with open(file_path, "wb") as buffer:
@@ -478,11 +401,8 @@ async def upload_file(file: UploadFile = File(...)):
 
     file_text = ""
 
-    # PDF SUPPORT
     if file.filename.lower().endswith(".pdf"):
-
         try:
-
             doc = fitz.open(file_path)
 
             for page in doc:
@@ -490,203 +410,139 @@ async def upload_file(file: UploadFile = File(...)):
 
             doc.close()
 
-        except Exception as e:
+            process(f"User uploaded PDF: {file.filename}")
+            save_to_life_story(file.filename, file_text)
 
             return {
-                "status": "error",
-                "message": f"PDF read failed: {str(e)}"
+                "status": "success",
+                "filename": file.filename,
+                "preview": file_text[:3000],
             }
 
-    # TXT SUPPORT
-    elif file.filename.lower().endswith(".txt"):
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"PDF read failed: {str(e)}",
+            }
 
+    if file.filename.lower().endswith(".txt"):
         try:
-
             with open(file_path, "r", encoding="utf-8") as f:
                 file_text = f.read()
 
-        except Exception as e:
+            process(f"User uploaded TXT: {file.filename}")
+            save_to_life_story(file.filename, file_text)
 
             return {
-                "status": "error",
-                "message": f"TXT read failed: {str(e)}"
+                "status": "success",
+                "filename": file.filename,
+                "preview": file_text[:3000],
             }
 
-    # IMAGE SUPPORT
-    elif (
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"TXT read failed: {str(e)}",
+            }
+
+    if (
         file.filename.lower().endswith(".png")
         or file.filename.lower().endswith(".jpg")
         or file.filename.lower().endswith(".jpeg")
     ):
-
         try:
-
             with open(file_path, "rb") as img_file:
-
                 base64_image = base64.b64encode(
                     img_file.read()
                 ).decode("utf-8")
 
             vision_response = client.chat.completions.create(
-
                 model="gpt-4o-mini",
-
                 messages=[
-
                     {
-                        "role":"user",
-                        "content":[
+                        "role": "user",
+                        "content": [
                             {
-                                "type":"text",
-                                "text":"Analyze this image and describe it clearly."
+                                "type": "text",
+                                "text": (
+                                    "Read and analyze this image. "
+                                    "If it contains handwriting or document text, "
+                                    "extract as much text as possible and then summarize it clearly."
+                                ),
                             },
                             {
-                                "type":"image_url",
-                                "image_url":{
-                                    "url":f"data:image/jpeg;base64,{base64_image}"
-                                }
-                            }
-                        ]
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                },
+                            },
+                        ],
                     }
-                ]
+                ],
             )
 
-            vision_text = (
-                vision_response
-                .choices[0]
-                .message
-                .content
-            )
+            vision_text = vision_response.choices[0].message.content
 
-            process(
-                f"User uploaded image: {file.filename}"
-            )
-
-            save_to_life_story(
-                file.filename,
-                vision_text
-            )
+            process(f"User uploaded image: {file.filename}")
+            save_to_life_story(file.filename, vision_text)
 
             return {
-                "status":"success",
-                "filename":file.filename,
-                "preview":vision_text
+                "status": "success",
+                "filename": file.filename,
+                "preview": vision_text,
             }
 
         except Exception as e:
-
             return {
-                "status":"error",
-                "message":f"Image analysis failed: {str(e)}"
+                "status": "error",
+                "message": f"Image analysis failed: {str(e)}",
             }
 
-    else:
-
-        return {
-            "status": "uploaded",
-            "filename": file.filename,
-            "message": "File uploaded successfully."
-        }
-
-    process(f"User uploaded file: {file.filename}")
-
     return {
-        "status": "success",
+        "status": "uploaded",
         "filename": file.filename,
-        "preview": file_text[:3000]
+        "message": "File uploaded successfully.",
     }
 
-
-
-
-
-
-
-# =========================================================
-# LIFE STORY SEARCH
-# =========================================================
 
 @app.post("/recall")
 async def recall_story(req: ChatRequest):
+    matches = search_life_story(req.message)
 
-    query = req.message
-
-    matches = search_life_story(query)
-
-    if len(matches) == 0:
-
+    if not matches:
         return {
-            "reply":"I could not find anything in your story memory about that yet."
+            "reply": "I could not find anything in your story memory about that yet."
         }
 
-    summary = ""
+    reply = ""
 
     for i, item in enumerate(matches):
+        reply += f"\n\n--- MEMORY {i + 1} ---\n"
+        reply += item.get("full_content", item.get("preview", ""))
 
-        summary += f"\n\n--- MEMORY {i+1} ---\n"
+    return {"reply": reply}
 
-        summary += (
-            item.get("content","")[:2000]
-        )
-
-    return {
-        "reply": summary
-    }
-
-
-
-
-
-
-
-
-
-# =========================================================
-# STORY LIBRARY
-# =========================================================
 
 @app.get("/stories")
 async def get_stories():
+    stories = safe_load_json(LIFE_STORY_FILE, [])
 
-    try:
+    if not isinstance(stories, list):
+        stories = []
 
-        if not os.path.exists(LIFE_STORY_FILE):
+    clean_stories = []
 
-            return {
-                "stories":[]
+    for item in stories:
+        clean_stories.append(
+            {
+                "title": item.get("title", "Untitled"),
+                "preview": item.get("preview", ""),
+                "full_content": item.get(
+                    "full_content",
+                    item.get("content", ""),
+                ),
+                "score": item.get("score", 0),
             }
+        )
 
-        with open(
-            LIFE_STORY_FILE,
-            "r",
-            encoding="utf-8"
-        ) as f:
-
-            stories = json.load(f)
-
-        clean_stories = []
-
-        for item in stories:
-
-            clean_stories.append({
-
-                "title": item.get("title","Untitled"),
-
-                "preview": item.get("preview",""),
-
-                "full_content": item.get("full_content","")
-
-            })
-
-        return {
-            "stories": clean_stories[::-1]
-        }
-
-    except Exception as e:
-
-        return {
-            "stories":[],
-            "error":str(e)
-        }
-
-
+    return {"stories": clean_stories[::-1]}
