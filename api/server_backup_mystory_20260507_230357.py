@@ -9,7 +9,6 @@ import shutil
 import os
 import fitz
 import base64
-import json
 
 load_dotenv()
 
@@ -112,54 +111,7 @@ def root():
 
 UPLOAD_DIR = "uploads"
 
-LIFE_STORY_FILE = "memory/life_story.json"
-
-
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-
-def save_to_life_story(title, content_text):
-
-    try:
-
-        if os.path.exists(LIFE_STORY_FILE):
-
-            with open(
-                LIFE_STORY_FILE,
-                "r",
-                encoding="utf-8"
-            ) as f:
-
-                data = json.load(f)
-
-        else:
-
-            data = []
-
-        entry = {
-            "title": title,
-            "content": content_text
-        }
-
-        data.append(entry)
-
-        with open(
-            LIFE_STORY_FILE,
-            "w",
-            encoding="utf-8"
-        ) as f:
-
-            json.dump(
-                data,
-                f,
-                indent=2,
-                ensure_ascii=False
-            )
-
-    except Exception as e:
-
-        print("LIFE STORY SAVE ERROR:", e)
-
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -255,11 +207,6 @@ async def upload_file(file: UploadFile = File(...)):
                 f"User uploaded image: {file.filename}"
             )
 
-            save_to_life_story(
-                file.filename,
-                vision_text
-            )
-
             return {
                 "status":"success",
                 "filename":file.filename,
@@ -288,6 +235,5 @@ async def upload_file(file: UploadFile = File(...)):
         "filename": file.filename,
         "preview": file_text[:3000]
     }
-
 
 
