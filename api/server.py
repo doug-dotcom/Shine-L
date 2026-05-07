@@ -160,8 +160,8 @@ async def upload_file(file: UploadFile = File(...)):
     # IMAGE SUPPORT
     elif (
         file.filename.lower().endswith(".png")
-        -or file.filename.lower().endswith(".jpg")
-        -or file.filename.lower().endswith(".jpeg")
+        or file.filename.lower().endswith(".jpg")
+        or file.filename.lower().endswith(".jpeg")
     ):
 
         try:
