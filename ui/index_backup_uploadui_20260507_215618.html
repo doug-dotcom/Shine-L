@@ -160,25 +160,6 @@ button:active{
     }
 }
 
-
-.upload-btn{
-    width:56px;
-    height:56px;
-    border-radius:14px;
-    background:#1d4ed8;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:32px;
-    font-weight:bold;
-    cursor:pointer;
-    flex-shrink:0;
-}
-
-.upload-btn:active{
-    transform:scale(0.96);
-}
-
 </style>
 </head>
 
@@ -193,83 +174,13 @@ button:active{
     <div class="chat-box" id="chat"></div>
 
     <div class="input-row">
-
-        <label for="fileUpload" class="upload-btn">+</label>
-
-        <input
-            type="file"
-            id="fileUpload"
-            style="display:none"
-            onchange="uploadFile()"
-        />
-
         <input id="input" placeholder="Talk to L..." />
-
         <button onclick="sendMessage()">Send</button>
-
     </div>
 
 </div>
 
 <script>
-
-async function uploadFile(){
-
-    const fileInput = document.getElementById("fileUpload");
-
-    const file = fileInput.files[0];
-
-    if(!file) return;
-
-    addMessage(
-        "L",
-        "Uploading: " + file.name
-    );
-
-    const formData = new FormData();
-
-    formData.append("file", file);
-
-    try{
-
-        const res = await fetch(
-            "https://shine-l-production.up.railway.app/upload",
-            {
-                method:"POST",
-                body:formData
-            }
-        );
-
-        const data = await res.json();
-
-        if(data.preview){
-
-            addMessage(
-                "L",
-                "📄 File Preview:
-
-" + data.preview
-            );
-
-        }else{
-
-            addMessage(
-                "L",
-                data.message || "Upload complete."
-            );
-        }
-
-    }catch(err){
-
-        console.error(err);
-
-        addMessage(
-            "L",
-            "❌ Upload failed."
-        );
-    }
-}
-
 
 function addMessage(sender, text){
 
