@@ -89,23 +89,6 @@ async def chat(req: ChatRequest):
     user_msg = req.message
 
     # ==========================================
-    # LOAD CANONICAL PROFILE
-    # ==========================================
-
-    profile = load_profile()
-
-    profile_context = ""
-
-    if profile:
-
-        profile_context += (
-            "\n\nCANONICAL PROFILE MEMORY:\n"
-            + json.dumps(profile, indent=2)
-        )
-
-        system_prompt += profile_context
-
-    # ==========================================
     # INTENT DETECTION
     # ==========================================
 
@@ -251,7 +234,7 @@ def root():
 
 UPLOAD_DIR = "uploads"
 
-LIFE_STORY_FILE = "memory/life_story.json"`r`nPROFILE_FILE = "memory/profile.json"
+LIFE_STORY_FILE = "memory/life_story.json"
 
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -260,29 +243,6 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 
-
-
-def load_profile():
-
-    try:
-
-        if not os.path.exists(PROFILE_FILE):
-
-            return {}
-
-        with open(
-            PROFILE_FILE,
-            "r",
-            encoding="utf-8"
-        ) as f:
-
-            return json.load(f)
-
-    except Exception as e:
-
-        print("PROFILE LOAD ERROR:", e)
-
-        return {}
 
 def detect_intent(user_text):
 
@@ -684,5 +644,4 @@ async def get_stories():
             "stories":[],
             "error":str(e)
         }
-
 
