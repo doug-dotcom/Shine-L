@@ -8,7 +8,6 @@ from fastapi import UploadFile, File
 import shutil
 import os
 import fitz
-import base64
 
 load_dotenv()
 
@@ -157,75 +156,12 @@ async def upload_file(file: UploadFile = File(...)):
                 "message": f"TXT read failed: {str(e)}"
             }
 
-    # IMAGE SUPPORT
-    elif (
-        file.filename.lower().endswith(".png")
-        -or file.filename.lower().endswith(".jpg")
-        -or file.filename.lower().endswith(".jpeg")
-    ):
-
-        try:
-
-            with open(file_path, "rb") as img_file:
-
-                base64_image = base64.b64encode(
-                    img_file.read()
-                ).decode("utf-8")
-
-            vision_response = client.chat.completions.create(
-
-                model="gpt-4o-mini",
-
-                messages=[
-
-                    {
-                        "role":"user",
-                        "content":[
-                            {
-                                "type":"text",
-                                "text":"Analyze this image and describe it clearly."
-                            },
-                            {
-                                "type":"image_url",
-                                "image_url":{
-                                    "url":f"data:image/jpeg;base64,{base64_image}"
-                                }
-                            }
-                        ]
-                    }
-                ]
-            )
-
-            vision_text = (
-                vision_response
-                .choices[0]
-                .message
-                .content
-            )
-
-            process(
-                f"User uploaded image: {file.filename}"
-            )
-
-            return {
-                "status":"success",
-                "filename":file.filename,
-                "preview":vision_text
-            }
-
-        except Exception as e:
-
-            return {
-                "status":"error",
-                "message":f"Image analysis failed: {str(e)}"
-            }
-
     else:
 
         return {
             "status": "uploaded",
             "filename": file.filename,
-            "message": "File uploaded successfully."
+            "message": "File uploaded successfully (analysis coming next phase)"
         }
 
     process(f"User uploaded file: {file.filename}")
@@ -235,5 +171,4 @@ async def upload_file(file: UploadFile = File(...)):
         "filename": file.filename,
         "preview": file_text[:3000]
     }
-
 
