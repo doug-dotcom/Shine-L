@@ -139,7 +139,7 @@ Instructions:
 
             story_context += (
                 "\n\nSTORY MEMORY:\n" +
-                item.get("preview","")
+                item.get("content","")[:3000]
             )
 
     system_prompt += story_context
@@ -301,12 +301,9 @@ def save_to_life_story(title, content_text):
             content_text
         )
 
-        preview_text = content_text[:3000]
-
         entry = {
             "title": title,
-            "preview": preview_text,
-            "full_content": content_text,
+            "content": content_text,
             "score": memory_score
         }
 
@@ -494,7 +491,6 @@ async def recall_story(req: ChatRequest):
     return {
         "reply": summary
     }
-
 
 
 
