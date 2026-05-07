@@ -13,6 +13,45 @@ import json
 
 load_dotenv()
 
+DRIFT_TRIGGERS = [
+
+    "confused",
+    "overwhelmed",
+    "lost",
+    "drifting",
+    "too much",
+    "slow down",
+    "not making sense",
+    "reset",
+    "spiraling",
+    "panic",
+    "anxious"
+
+]
+
+GROUNDING_RESPONSE = """
+
+Doug may be drifting or overwhelmed.
+
+Slow down.
+
+Reduce information density.
+
+Use:
+- shorter sections
+- calm pacing
+- clear structure
+- emotional grounding
+- step-by-step guidance
+
+Prioritize:
+clarity,
+safety,
+orientation,
+and next action.
+
+"""
+
 # 👉 Ellie (memory brain)
 from memory.memory_engine import process, build_context, detect_emotional_state, generate_emotional_tone
 
