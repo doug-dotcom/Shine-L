@@ -78,25 +78,6 @@ Instructions:
 - Be calm, direct, and helpful
 """
 
-    # =====================================================
-    # STORY MEMORY SEARCH
-    # =====================================================
-
-    story_matches = search_life_story(user_msg)
-
-    story_context = ""
-
-    if len(story_matches) > 0:
-
-        for item in story_matches:
-
-            story_context += (
-                "\n\nSTORY MEMORY:\n" +
-                item.get("content","")[:3000]
-            )
-
-    system_prompt += story_context
-
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
@@ -136,45 +117,6 @@ LIFE_STORY_FILE = "memory/life_story.json"
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-
-
-def search_life_story(query):
-
-    try:
-
-        if not os.path.exists(LIFE_STORY_FILE):
-            return []
-
-        with open(
-            LIFE_STORY_FILE,
-            "r",
-            encoding="utf-8"
-        ) as f:
-
-            data = json.load(f)
-
-        matches = []
-
-        query_lower = query.lower()
-
-        for item in data:
-
-            text_blob = (
-                str(item.get("title","")) + " " +
-                str(item.get("content",""))
-            ).lower()
-
-            if query_lower in text_blob:
-
-                matches.append(item)
-
-        return matches[:5]
-
-    except Exception as e:
-
-        print("SEARCH ERROR:", e)
-
-        return []
 
 def save_to_life_story(title, content_text):
 
@@ -349,38 +291,4 @@ async def upload_file(file: UploadFile = File(...)):
 
 
 
-
-
-
-
-# =========================================================
-# LIFE STORY SEARCH
-# =========================================================
-
-@app.post("/recall")
-async def recall_story(req: ChatRequest):
-
-    query = req.message
-
-    matches = search_life_story(query)
-
-    if len(matches) == 0:
-
-        return {
-            "reply":"I could not find anything in your story memory about that yet."
-        }
-
-    summary = ""
-
-    for i, item in enumerate(matches):
-
-        summary += f"\n\n--- MEMORY {i+1} ---\n"
-
-        summary += (
-            item.get("content","")[:2000]
-        )
-
-    return {
-        "reply": summary
-    }
 
