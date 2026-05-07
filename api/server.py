@@ -251,7 +251,8 @@ def root():
 
 UPLOAD_DIR = "uploads"
 
-LIFE_STORY_FILE = "memory/life_story.json"`r`nPROFILE_FILE = "memory/profile.json"
+LIFE_STORY_FILE = "memory/life_story.json"
+PROFILE_FILE = "memory/profile.json"
 
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
