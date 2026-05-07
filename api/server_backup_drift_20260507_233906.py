@@ -84,14 +84,6 @@ Instructions:
 
     story_matches = search_life_story(user_msg)
 
-    # ==============================================
-    # DRIFT DETECTION
-    # ==============================================
-
-    if detect_drift(user_msg):
-
-        system_prompt += GROUNDING_RESPONSE
-
     story_context = ""
 
     if len(story_matches) > 0:
@@ -146,19 +138,6 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 
-
-
-def detect_drift(user_text):
-
-    text_lower = user_text.lower()
-
-    for trigger in DRIFT_TRIGGERS:
-
-        if trigger in text_lower:
-
-            return True
-
-    return False
 
 def calculate_memory_score(text):
 
@@ -452,7 +431,6 @@ async def recall_story(req: ChatRequest):
     return {
         "reply": summary
     }
-
 
 
 
