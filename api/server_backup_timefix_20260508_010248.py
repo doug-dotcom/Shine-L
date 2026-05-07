@@ -7,7 +7,6 @@ from openai import OpenAI
 import os
 import json
 from datetime import datetime
-from zoneinfo import ZoneInfo
 import shutil
 import base64
 import fitz
@@ -399,25 +398,6 @@ def root():
 @app.post("/chat")
 async def chat(req: ChatRequest):
     user_msg = req.message
-
-    # ==========================================
-    # LIVE BRISBANE TIME
-    # ==========================================
-
-    current_time = datetime.now(
-        ZoneInfo("Australia/Brisbane")
-    )
-
-    time_context = f"""
-
-CURRENT DATE/TIME:
-{current_time.strftime("%A %d %B %Y")}
-{current_time.strftime("%I:%M %p")}
-
-Timezone:
-Australia/Brisbane
-
-"""
     print("\nUSER MESSAGE:", user_msg)
 
     intent = detect_intent(user_msg)
@@ -450,8 +430,6 @@ Australia/Brisbane
 
     system_prompt = f"""
 You are L, Doug's personal AI companion.
-
-{time_context}
 
 You have persistent memory.
 
@@ -657,4 +635,3 @@ async def get_stories():
         )
 
     return {"stories": clean_stories[::-1]}
-
