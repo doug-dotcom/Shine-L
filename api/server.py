@@ -89,23 +89,6 @@ async def chat(req: ChatRequest):
     user_msg = req.message
 
     # ==========================================
-    # LOAD CANONICAL PROFILE
-    # ==========================================
-
-    profile = load_profile()
-
-    profile_context = ""
-
-    if profile:
-
-        profile_context += (
-            "\n\nCANONICAL PROFILE MEMORY:\n"
-            + json.dumps(profile, indent=2)
-        )
-
-        system_prompt += profile_context
-
-    # ==========================================
     # INTENT DETECTION
     # ==========================================
 
@@ -162,6 +145,26 @@ async def chat(req: ChatRequest):
             system_prompt += memory_context
 
     print("\n🟡 USER MESSAGE:", user_msg)
+
+
+    # ==========================================
+    # LOAD CANONICAL PROFILE
+    # ==========================================
+
+    profile = load_profile()
+
+    profile_context = ""
+
+    if profile:
+
+        profile_context += (
+            "\n\nCANONICAL PROFILE MEMORY:\n"
+            + json.dumps(profile, indent=2)
+        )
+
+        system_prompt += profile_context
+
+
 
     # 🧠 STEP 1 — store memory
     process(user_msg)
