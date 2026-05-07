@@ -138,21 +138,6 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 
-
-def calculate_memory_score(text):
-
-    score = 0
-
-    text_lower = text.lower()
-
-    for key, value in MEMORY_IMPORTANCE.items():
-
-        if key in text_lower:
-
-            score += value
-
-    return score
-
 def search_life_story(query):
 
     try:
@@ -196,12 +181,7 @@ def search_life_story(query):
 
             if score > 0:
 
-                final_score = (
-                    score +
-                    item.get("score",0)
-                )
-
-                item["_score"] = final_score
+                item["_score"] = score
 
                 matches.append(item)
 
@@ -237,14 +217,9 @@ def save_to_life_story(title, content_text):
 
             data = []
 
-        memory_score = calculate_memory_score(
-            content_text
-        )
-
         entry = {
             "title": title,
-            "content": content_text,
-            "score": memory_score
+            "content": content_text
         }
 
         data.append(entry)
@@ -431,6 +406,5 @@ async def recall_story(req: ChatRequest):
     return {
         "reply": summary
     }
-
 
 
