@@ -88,62 +88,6 @@ class ChatRequest(BaseModel):
 async def chat(req: ChatRequest):
     user_msg = req.message
 
-    # ==========================================
-    # INTENT DETECTION
-    # ==========================================
-
-    intent = detect_intent(user_msg)
-
-    # ==========================================
-    # FULL FILE RECALL
-    # ==========================================
-
-    if intent == "full_recall":
-
-        matches = search_life_story(user_msg)
-
-        if len(matches) == 0:
-
-            return {
-                "reply":"I could not find a matching full file in memory."
-            }
-
-        response_text = ""
-
-        for item in matches:
-
-            response_text += (
-                "\n\n====================\n"
-                + item.get("title","")
-                + "\n====================\n\n"
-                + item.get("full_content","")
-            )
-
-        return {
-            "reply": response_text
-        }
-
-    # ==========================================
-    # MEMORY RECALL
-    # ==========================================
-
-    if intent == "memory_recall":
-
-        matches = search_life_story(user_msg)
-
-        if len(matches) > 0:
-
-            memory_context = ""
-
-            for item in matches:
-
-                memory_context += (
-                    "\n\nMEMORY:\n"
-                    + item.get("preview","")
-                )
-
-            system_prompt += memory_context
-
     print("\n🟡 USER MESSAGE:", user_msg)
 
     # 🧠 STEP 1 — store memory
@@ -242,44 +186,6 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 
-
-
-def detect_intent(user_text):
-
-    text = user_text.lower()
-
-    # ==========================================
-    # FULL FILE RECALL
-    # ==========================================
-
-    if (
-        "full file" in text
-        or "full document" in text
-        or "read full" in text
-        or "show full" in text
-        or "word for word" in text
-    ):
-
-        return "full_recall"
-
-    # ==========================================
-    # MEMORY RECALL
-    # ==========================================
-
-    if (
-        "remember" in text
-        or "recall" in text
-        or "what do you know" in text
-        or "tell me about" in text
-    ):
-
-        return "memory_recall"
-
-    # ==========================================
-    # NORMAL CHAT
-    # ==========================================
-
-    return "normal"
 
 def detect_drift(user_text):
 
@@ -588,7 +494,6 @@ async def recall_story(req: ChatRequest):
     return {
         "reply": summary
     }
-
 
 
 
