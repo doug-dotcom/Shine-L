@@ -6,7 +6,6 @@ from openai import OpenAI
 
 import os
 import json
-from datetime import datetime
 import shutil
 import base64
 import fitz
@@ -36,7 +35,6 @@ app.add_middleware(
 UPLOAD_DIR = "uploads"
 LIFE_STORY_FILE = "memory/life_story.json"
 PROFILE_FILE = "memory/profile.json"
-CONVERSATION_FILE = "memory/conversations.json"
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs("memory", exist_ok=True)
@@ -279,41 +277,6 @@ def save_to_life_story(title, content_text):
     safe_save_json(LIFE_STORY_FILE, stories)
 
 
-
-def save_conversation_turn(user_msg, assistant_reply):
-
-    try:
-
-        conversations = safe_load_json(
-            CONVERSATION_FILE,
-            []
-        )
-
-        entry = {
-
-            "timestamp": str(datetime.now()),
-
-            "user": user_msg,
-
-            "assistant": assistant_reply
-
-        }
-
-        conversations.append(entry)
-
-        safe_save_json(
-            CONVERSATION_FILE,
-            conversations
-        )
-
-    except Exception as e:
-
-        print(
-            "CONVERSATION SAVE ERROR:",
-            e
-        )
-
-
 def build_profile_context():
     profile = load_profile()
 
@@ -325,49 +288,6 @@ def build_profile_context():
         indent=2,
         ensure_ascii=False,
     )
-
-
-
-def build_recent_conversation_context():
-
-    try:
-
-        conversations = safe_load_json(
-            CONVERSATION_FILE,
-            []
-        )
-
-        if not conversations:
-            return ""
-
-        recent = conversations[-10:]
-
-        context = "\n\nRECENT CONVERSATIONS:\n"
-
-        for convo in recent:
-
-            context += (
-                "\nUSER: "
-                + convo.get("user","")
-            )
-
-            context += (
-                "\nL: "
-                + convo.get("assistant","")
-            )
-
-            context += "\n"
-
-        return context
-
-    except Exception as e:
-
-        print(
-            "CONVO CONTEXT ERROR:",
-            e
-        )
-
-        return ""
 
 
 def build_story_context(user_msg):
@@ -451,10 +371,6 @@ Instructions:
 
     system_prompt += build_profile_context()
 
-    system_prompt += (
-        build_recent_conversation_context()
-    )
-
     if intent == "memory_recall":
         system_prompt += build_story_context(user_msg)
 
@@ -472,11 +388,6 @@ Instructions:
     reply = response.choices[0].message.content
 
     print("\nL RESPONSE:", reply)
-
-    save_conversation_turn(
-        user_msg,
-        reply
-    )
 
     return {"reply": reply}
 
