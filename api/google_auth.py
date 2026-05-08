@@ -76,7 +76,7 @@ def save_credentials(creds: Credentials):
     token_json = creds.to_json()
 
     existing = (
-        supabase.table("system_memory")
+        supabase.table("memories")
         .select("*")
         .eq("key", TOKEN_KEY)
         .execute()
@@ -90,7 +90,7 @@ def save_credentials(creds: Credentials):
     if existing.data:
 
         (
-            supabase.table("system_memory")
+            supabase.table("memory")
             .update(payload)
             .eq("key", TOKEN_KEY)
             .execute()
@@ -99,7 +99,7 @@ def save_credentials(creds: Credentials):
     else:
 
         (
-            supabase.table("system_memory")
+            supabase.table("memory")
             .insert(payload)
             .execute()
         )
