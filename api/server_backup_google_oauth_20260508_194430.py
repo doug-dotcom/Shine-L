@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile, File, Request
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse, HTMLResponse
 from pydantic import BaseModel
 from openai import OpenAI
 
@@ -23,26 +22,6 @@ from memory.memory_engine import (
 load_dotenv()
 
 print("USING CLEAN SHINE L SERVER V2")
-
-
-# =========================================================
-# GOOGLE CLOUD AUTH
-# =========================================================
-try:
-    from api.google_auth import (
-        build_auth_url,
-        handle_callback,
-        google_status,
-        clear_credentials
-    )
-
-    GOOGLE_AUTH_AVAILABLE = True
-
-except Exception as e:
-
-    print("GOOGLE AUTH IMPORT ERROR:", e)
-
-    GOOGLE_AUTH_AVAILABLE = False
 
 app = FastAPI()
 client = OpenAI()
@@ -914,94 +893,4 @@ async def emily_direct(req: ChatRequest):
     }
 
 
-
-
-
-# =========================================================
-# GOOGLE AUTH ROUTES
-# =========================================================
-
-@app.get("/google/status")
-async def google_connection_status():
-
-    if not GOOGLE_AUTH_AVAILABLE:
-
-        return {
-            "connected": False,
-            "error": "Google auth module is not available."
-        }
-
-    return google_status()
-
-
-@app.get("/google/auth/start")
-async def google_auth_start():
-
-    if not GOOGLE_AUTH_AVAILABLE:
-
-        return {
-            "error": "Google auth module is not available."
-        }
-
-    auth_url = build_auth_url()
-
-    return RedirectResponse(auth_url)
-
-
-@app.get("/google/auth/callback")
-async def google_auth_callback(request: Request):
-
-    if not GOOGLE_AUTH_AVAILABLE:
-
-        return HTMLResponse(
-            "<h2>Google auth module is not available.</h2>"
-        )
-
-    full_url = str(request.url)
-
-    try:
-
-        result = handle_callback(full_url)
-
-        return HTMLResponse(
-            """
-            <html>
-                <body style="font-family:Arial;padding:40px;">
-                    <h1>✅ Google Connected</h1>
-                    <p>Emily, Callie, and Tania can now use the shared Google auth layer.</p>
-                    <p>You can close this tab and return to Shine L.</p>
-                </body>
-            </html>
-            """
-        )
-
-    except Exception as e:
-
-        return HTMLResponse(
-            f"""
-            <html>
-                <body style="font-family:Arial;padding:40px;">
-                    <h1>❌ Google Connection Failed</h1>
-                    <pre>{str(e)}</pre>
-                </body>
-            </html>
-            """
-        )
-
-
-@app.get("/google/auth/reset")
-async def google_auth_reset():
-
-    if not GOOGLE_AUTH_AVAILABLE:
-
-        return {
-            "error": "Google auth module is not available."
-        }
-
-    clear_credentials()
-
-    return {
-        "status": "reset",
-        "message": "Google token cleared. Reconnect via /google/auth/start"
-    }
 
