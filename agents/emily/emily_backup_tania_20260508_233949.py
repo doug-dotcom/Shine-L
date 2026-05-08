@@ -131,7 +131,7 @@ def get_emails(max_results=5):
     return emails
 
 # =====================================================
-# CALENDAR DETECTION
+# EVENT DETECTION
 # =====================================================
 
 def detect_calendar_items(emails):
@@ -171,7 +171,7 @@ def detect_calendar_items(emails):
             if re.search(p, text):
                 score += 1
 
-        if score >= 1:
+        if score >= 2:
 
             findings.append({
 
@@ -189,66 +189,10 @@ def detect_calendar_items(emails):
     return findings
 
 # =====================================================
-# TASK DETECTION
+# FORMAT CALENDAR HANDOFFS
 # =====================================================
 
-def detect_task_items(emails):
-
-    findings = []
-
-    patterns = [
-
-        r'\bplease\b',
-        r'\bsend\b',
-        r'\bcomplete\b',
-        r'\bfinish\b',
-        r'\bdeadline\b',
-        r'\bdue\b',
-        r'\baction required\b',
-        r'\bfollow up\b',
-        r'\brespond\b',
-        r'\breply\b',
-        r'\bpay\b',
-        r'\breview\b',
-        r'\bsubmit\b'
-
-    ]
-
-    for e in emails:
-
-        text = (
-            e["subject"] + " " + e["snippet"]
-        ).lower()
-
-        score = 0
-
-        for p in patterns:
-
-            if re.search(p, text):
-                score += 1
-
-        if score >= 1:
-
-            findings.append({
-
-                "subject":
-                    e["subject"],
-
-                "from":
-                    e["from"],
-
-                "snippet":
-                    e["snippet"]
-
-            })
-
-    return findings
-
-# =====================================================
-# CALENDAR HANDOFF
-# =====================================================
-
-def build_calendar_handoff(findings):
+def build_handoff_section(findings):
 
     if not findings:
         return ""
@@ -277,44 +221,6 @@ Snippet:
 {f['snippet']}
 
 📅 Send to Callie for calendar review?
-
-"""
-
-    return output
-
-# =====================================================
-# TASK HANDOFF
-# =====================================================
-
-def build_task_handoff(findings):
-
-    if not findings:
-        return ""
-
-    output = """
-
-# ✅ Emily → Tania Task Suggestions
-
-Emily detected possible action items.
-
-"""
-
-    for f in findings:
-
-        output += f"""
-
-## 👀 Possible Task
-
-From:
-{f['from']}
-
-Subject:
-{f['subject']}
-
-Snippet:
-{f['snippet']}
-
-✅ Send to Tania for task creation?
 
 """
 
@@ -440,31 +346,15 @@ def handle_email_request(message: str):
             emails
         )
 
-        calendar_items = detect_calendar_items(
+        findings = detect_calendar_items(
             emails
         )
 
-        task_items = detect_task_items(
-            emails
+        handoffs = build_handoff_section(
+            findings
         )
 
-        calendar_handoffs = (
-            build_calendar_handoff(
-                calendar_items
-            )
-        )
-
-        task_handoffs = (
-            build_task_handoff(
-                task_items
-            )
-        )
-
-        return (
-            summary
-            + calendar_handoffs
-            + task_handoffs
-        )
+        return summary + handoffs
 
     except Exception as e:
 
