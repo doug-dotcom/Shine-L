@@ -1,10 +1,43 @@
-from openai import OpenAI
+import os
+import base64
+from bs4 import BeautifulSoup
 
-from api.google_auth import (
-    get_google_service
+from google.oauth2.credentials import Credentials
+
+from google_auth_oauthlib.flow import (
+    InstalledAppFlow
 )
 
+from googleapiclient.discovery import build
+
+from openai import OpenAI
+
 client = OpenAI()
+
+# =====================================================
+# CONFIG
+# =====================================================
+
+BASE_DIR = os.path.dirname(__file__)
+
+CONFIG_PATH = os.path.abspath(
+    os.path.join(
+        BASE_DIR,
+        "..",
+        "..",
+        "configs"
+    )
+)
+
+SCOPES = [
+
+    "https://www.googleapis.com/auth/gmail.readonly",
+
+    "https://www.googleapis.com/auth/calendar",
+
+    "https://www.googleapis.com/auth/tasks"
+
+]
 
 # =====================================================
 # ROUTING
@@ -37,15 +70,69 @@ def should_handle(message: str) -> bool:
     )
 
 # =====================================================
+# AUTH
+# =====================================================
+
+def get_service():
+
+    creds = None
+
+    token_path = os.path.join(
+        CONFIG_PATH,
+        "token.json"
+    )
+
+    creds_path = os.path.join(
+        CONFIG_PATH,
+        "credentials.json"
+    )
+
+    if os.path.exists(token_path):
+
+        creds = (
+            Credentials
+            .from_authorized_user_file(
+                token_path,
+                SCOPES
+            )
+        )
+
+    if not creds:
+
+        flow = (
+            InstalledAppFlow
+            .from_client_secrets_file(
+                creds_path,
+                SCOPES
+            )
+        )
+
+        creds = flow.run_local_server(
+            port=0
+        )
+
+        with open(
+            token_path,
+            "w"
+        ) as token:
+
+            token.write(
+                creds.to_json()
+            )
+
+    return build(
+        "gmail",
+        "v1",
+        credentials=creds
+    )
+
+# =====================================================
 # GET EMAILS
 # =====================================================
 
 def get_emails(max_results=5):
 
-    service = get_google_service(
-        "gmail",
-        "v1"
-    )
+    service = get_service()
 
     results = (
         service.users()
