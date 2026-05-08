@@ -138,3 +138,44 @@ def handle_calendar_request(message: str):
 {str(e)}
 
 """
+
+# =====================================================
+# CREATE EVENT FROM HANDOFF
+# =====================================================
+
+def create_event_from_handoff(event_data):
+
+    try:
+
+        service = get_google_service(
+            "calendar",
+            "v3"
+        )
+
+        body = {
+
+            "summary":
+                event_data.get(
+                    "subject",
+                    "Meeting"
+                ),
+
+            "description":
+                event_data.get(
+                    "snippet",
+                    ""
+                )
+
+        }
+
+        service.events().insert(
+            calendarId="primary",
+            body=body
+        ).execute()
+
+        return f"📅 Event created: {body['summary']}"
+
+    except Exception as e:
+
+        return f"❌ Event creation failed: {str(e)}"
+

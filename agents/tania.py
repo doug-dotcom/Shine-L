@@ -148,3 +148,61 @@ def handle_task_request(message: str):
 {str(e)}
 
 """
+
+# =====================================================
+# CREATE TASK FROM HANDOFF
+# =====================================================
+
+def create_task_from_handoff(task_data):
+
+    try:
+
+        service = get_google_service(
+            "tasks",
+            "v1"
+        )
+
+        tasklists = (
+            service.tasklists()
+            .list()
+            .execute()
+        )
+
+        lists = tasklists.get(
+            "items",
+            []
+        )
+
+        if not lists:
+
+            return "❌ No task lists found."
+
+        primary = lists[0]["id"]
+
+        body = {
+
+            "title":
+                task_data.get(
+                    "subject",
+                    "Task"
+                ),
+
+            "notes":
+                task_data.get(
+                    "snippet",
+                    ""
+                )
+
+        }
+
+        service.tasks().insert(
+            tasklist=primary,
+            body=body
+        ).execute()
+
+        return f"✅ Task created: {body['title']}"
+
+    except Exception as e:
+
+        return f"❌ Task creation failed: {str(e)}"
+
