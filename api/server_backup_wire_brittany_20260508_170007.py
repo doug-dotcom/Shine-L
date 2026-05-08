@@ -26,18 +26,6 @@ print("USING CLEAN SHINE L SERVER V2")
 app = FastAPI()
 client = OpenAI()
 
-# =========================================================
-# BRITTANY BROWSER AGENT
-# =========================================================
-try:
-    from agents.brittany_browser.brittany import should_handle as brittany_should_handle
-    from agents.brittany_browser.brittany import investigate as brittany_investigate
-    BRITTANY_AVAILABLE = True
-except Exception as e:
-    print("BRITTANY IMPORT ERROR:", e)
-    BRITTANY_AVAILABLE = False
-
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://shine-l.netlify.app"],
@@ -669,24 +657,4 @@ async def get_stories():
         )
 
     return {"stories": clean_stories[::-1]}
-
-
-
-# =========================================================
-# BRITTANY DIRECT TEST ENDPOINT
-# =========================================================
-@app.post("/brittany")
-async def brittany_direct(req: ChatRequest):
-
-    if not BRITTANY_AVAILABLE:
-
-        return {
-            "reply": "Brittany Browser is not available yet."
-        }
-
-    result = brittany_investigate(req.message)
-
-    return {
-        "reply": result
-    }
 
