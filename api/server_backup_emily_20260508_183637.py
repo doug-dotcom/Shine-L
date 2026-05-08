@@ -26,28 +26,6 @@ print("USING CLEAN SHINE L SERVER V2")
 app = FastAPI()
 client = OpenAI()
 
-
-# =========================================================
-# EMILY EMAIL AGENT
-# =========================================================
-try:
-
-    from agents.emily.emily import (
-        should_handle as emily_should_handle
-    )
-
-    from agents.emily.emily import (
-        handle_email_request
-    )
-
-    EMILY_AVAILABLE = True
-
-except Exception as e:
-
-    print("EMILY IMPORT ERROR:", e)
-
-    EMILY_AVAILABLE = False
-
 # =========================================================
 # BRITTANY BROWSER AGENT
 # =========================================================
@@ -456,34 +434,6 @@ Australia/Brisbane
 
     intent = detect_intent(user_msg)
 
-
-    # =====================================================
-    # EMILY EMAIL ROUTING
-    # =====================================================
-
-    if (
-        EMILY_AVAILABLE
-        and emily_should_handle(user_msg)
-    ):
-
-        print("\n📧 ROUTING TO EMILY EMAIL")
-
-        emily_reply = (
-            handle_email_request(user_msg)
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "📧 Emily Email:\n\n"
-            + emily_reply
-        )
-
-        return {
-            "reply":
-                "📧 Emily Email:\n\n"
-                + emily_reply
-        }
-
     # =====================================================
     # BRITTANY ROUTING V1
     # =====================================================
@@ -768,27 +718,4 @@ async def brittany_direct(req: ChatRequest):
         "reply": result
     }
 
-
-
-
-# =========================================================
-# EMILY DIRECT TEST ENDPOINT
-# =========================================================
-@app.post("/emily")
-async def emily_direct(req: ChatRequest):
-
-    if not EMILY_AVAILABLE:
-
-        return {
-            "reply":
-                "Emily Email is not available."
-        }
-
-    result = handle_email_request(
-        req.message
-    )
-
-    return {
-        "reply": result
-    }
 
