@@ -27,50 +27,6 @@ app = FastAPI()
 client = OpenAI()
 
 
-
-
-# =========================================================
-# TANIA TASK AGENT
-# =========================================================
-try:
-
-    from agents.tania.tania import (
-        should_handle as tania_should_handle
-    )
-
-    from agents.tania.tania import (
-        handle_task_request
-    )
-
-    TANIA_AVAILABLE = True
-
-except Exception as e:
-
-    print("TANIA IMPORT ERROR:", e)
-
-    TANIA_AVAILABLE = False
-
-# =========================================================
-# CALLIE CALENDAR AGENT
-# =========================================================
-try:
-
-    from agents.callie.callie import (
-        should_handle as callie_should_handle
-    )
-
-    from agents.callie.callie import (
-        handle_calendar_request
-    )
-
-    CALLIE_AVAILABLE = True
-
-except Exception as e:
-
-    print("CALLIE IMPORT ERROR:", e)
-
-    CALLIE_AVAILABLE = False
-
 # =========================================================
 # EMILY EMAIL AGENT
 # =========================================================
@@ -501,62 +457,6 @@ Australia/Brisbane
     intent = detect_intent(user_msg)
 
 
-
-
-    # =====================================================
-    # TANIA TASK ROUTING
-    # =====================================================
-
-    if (
-        TANIA_AVAILABLE
-        and tania_should_handle(user_msg)
-    ):
-
-        print("\n✅ ROUTING TO TANIA")
-
-        tania_reply = (
-            handle_task_request(user_msg)
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "✅ Tania Tasks:\n\n"
-            + tania_reply
-        )
-
-        return {
-            "reply":
-                "✅ Tania Tasks:\n\n"
-                + tania_reply
-        }
-
-    # =====================================================
-    # CALLIE CALENDAR ROUTING
-    # =====================================================
-
-    if (
-        CALLIE_AVAILABLE
-        and callie_should_handle(user_msg)
-    ):
-
-        print("\n📅 ROUTING TO CALLIE")
-
-        callie_reply = (
-            handle_calendar_request(user_msg)
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "📅 Callie Calendar:\n\n"
-            + callie_reply
-        )
-
-        return {
-            "reply":
-                "📅 Callie Calendar:\n\n"
-                + callie_reply
-        }
-
     # =====================================================
     # EMILY EMAIL ROUTING
     # =====================================================
@@ -891,6 +791,5 @@ async def emily_direct(req: ChatRequest):
     return {
         "reply": result
     }
-
 
 
