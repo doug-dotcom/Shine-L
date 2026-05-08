@@ -792,4 +792,3 @@ async def emily_direct(req: ChatRequest):
         "reply": result
     }
 
-
