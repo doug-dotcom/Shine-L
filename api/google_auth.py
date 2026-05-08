@@ -7,7 +7,6 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 
-
 # =====================================================
 # CONFIG
 # =====================================================
@@ -36,7 +35,6 @@ SCOPES = [
     "https://www.googleapis.com/auth/tasks"
 ]
 
-
 # =====================================================
 # CLIENT CONFIG
 # =====================================================
@@ -61,7 +59,6 @@ def get_client_config():
         }
     }
 
-
 # =====================================================
 # TOKEN STORAGE
 # =====================================================
@@ -71,28 +68,28 @@ def save_credentials(creds: Credentials):
     with open(TOKEN_PATH, "w", encoding="utf-8") as f:
         f.write(creds.to_json())
 
-
 def load_credentials() -> Optional[Credentials]:
 
     if not os.path.exists(TOKEN_PATH):
         return None
 
     try:
+
         return Credentials.from_authorized_user_file(
             TOKEN_PATH,
             SCOPES
         )
 
     except Exception as e:
-        print("GOOGLE TOKEN LOAD ERROR:", e)
-        return None
 
+        print("GOOGLE TOKEN LOAD ERROR:", e)
+
+        return None
 
 def clear_credentials():
 
     if os.path.exists(TOKEN_PATH):
         os.remove(TOKEN_PATH)
-
 
 # =====================================================
 # AUTH URL
@@ -100,11 +97,11 @@ def clear_credentials():
 
 def build_auth_url():
 
-   flow = Flow.from_client_config(
-    get_client_config(),
-    scopes=SCOPES,
-    redirect_uri=REDIRECT_URI,
-    autogenerate_code_verifier=False
+    flow = Flow.from_client_config(
+        get_client_config(),
+        scopes=SCOPES,
+        redirect_uri=REDIRECT_URI,
+        autogenerate_code_verifier=False
     )
 
     auth_url, state = flow.authorization_url(
@@ -115,18 +112,17 @@ def build_auth_url():
 
     return auth_url
 
-
 # =====================================================
 # CALLBACK HANDLER
 # =====================================================
 
 def handle_callback(full_callback_url: str):
 
-   flow = Flow.from_client_config(
-    get_client_config(),
-    scopes=SCOPES,
-    redirect_uri=REDIRECT_URI,
-    autogenerate_code_verifier=False
+    flow = Flow.from_client_config(
+        get_client_config(),
+        scopes=SCOPES,
+        redirect_uri=REDIRECT_URI,
+        autogenerate_code_verifier=False
     )
 
     flow.fetch_token(
@@ -142,7 +138,6 @@ def handle_callback(full_callback_url: str):
         "scopes": SCOPES,
         "redirect_uri": REDIRECT_URI
     }
-
 
 # =====================================================
 # STATUS
@@ -163,7 +158,9 @@ def google_status():
     if creds.expired and creds.refresh_token:
 
         try:
+
             creds.refresh(Request())
+
             save_credentials(creds)
 
         except Exception as e:
@@ -182,7 +179,6 @@ def google_status():
         "redirect_uri": REDIRECT_URI
     }
 
-
 # =====================================================
 # SHARED GOOGLE SERVICE
 # =====================================================
@@ -200,6 +196,7 @@ def get_google_service(service_name: str, version: str):
     if creds.expired and creds.refresh_token:
 
         creds.refresh(Request())
+
         save_credentials(creds)
 
     if not creds.valid:
