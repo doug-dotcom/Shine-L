@@ -17,7 +17,10 @@ def should_handle(message: str) -> bool:
         "todo",
         "to do",
         "reminder",
-        "reminders"
+        "reminders",
+        "check my tasks",
+        "show my tasks",
+        "tania"
 
     ]
 
@@ -25,25 +28,6 @@ def should_handle(message: str) -> bool:
         t in text
         for t in triggers
     )
-
-# =====================================================
-# NAME-ONLY INTERACTION
-# =====================================================
-
-def handle_name_only():
-
-    return """
-
-# ✅ Tania
-
-Would you like me to:
-
-1. Check your tasks
-2. Create a new task
-3. Review priorities
-4. Something else
-
-"""
 
 # =====================================================
 # GET TASKS
@@ -140,7 +124,33 @@ No active tasks found.
     return output
 
 # =====================================================
-# CREATE TASK
+# MAIN HANDLER
+# =====================================================
+
+def handle_task_request(message: str):
+
+    try:
+
+        tasks = get_tasks()
+
+        return summarize_tasks(
+            tasks
+        )
+
+    except Exception as e:
+
+        return f"""
+
+# ✅ Tania Tasks
+
+## ❌ Task Error
+
+{str(e)}
+
+"""
+
+# =====================================================
+# CREATE TASK FROM HANDOFF
 # =====================================================
 
 def create_task_from_handoff(task_data):
@@ -190,81 +200,9 @@ def create_task_from_handoff(task_data):
             body=body
         ).execute()
 
-        return f"""
-
-# ✅ Tania
-
-Task created successfully.
-
-🧠 Created Task:
-{body['title']}
-
-"""
+        return f"✅ Task created: {body['title']}"
 
     except Exception as e:
 
-        return f"""
+        return f"❌ Task creation failed: {str(e)}"
 
-# ❌ Tania
-
-Task creation failed.
-
-Error:
-{str(e)}
-
-"""
-
-# =====================================================
-# MAIN HANDLER
-# =====================================================
-
-def handle_task_request(message: str):
-
-    text = message.lower().strip()
-
-    # =================================================
-    # NAME ONLY
-    # =================================================
-
-    if text == "tania":
-
-        return handle_name_only()
-
-    # =================================================
-    # CHECK TASKS
-    # =================================================
-
-    if any(
-        p in text
-        for p in [
-
-            "check tasks",
-            "show tasks",
-            "my tasks",
-            "task list"
-
-        ]
-    ):
-
-        tasks = get_tasks()
-
-        return summarize_tasks(tasks)
-
-    # =================================================
-    # FALLBACK
-    # =================================================
-
-    return """
-
-# ✅ Tania
-
-I can help with:
-
-- task management
-- reminders
-- priorities
-- execution support
-
-What would you like to do?
-
-"""
