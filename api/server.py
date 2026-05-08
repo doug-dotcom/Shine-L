@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse, HTMLResponse
 from pydantic import BaseModel
 from openai import OpenAI
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 import os
 import json
@@ -45,6 +46,7 @@ except Exception as e:
     GOOGLE_AUTH_AVAILABLE = False
 
 app = FastAPI()
+app.add_middleware(HTTPSRedirectMiddleware)
 client = OpenAI()
 
 
