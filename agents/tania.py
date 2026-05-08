@@ -1,48 +1,150 @@
-import json
-import os
-from datetime import datetime
+from api.google_auth import (
+    get_google_service
+)
 
-TASK_PATH = "C:/Shine_L/memory/tasks.json"
+# =====================================================
+# ROUTING
+# =====================================================
 
+def should_handle(message: str) -> bool:
 
-def load_tasks():
-    try:
-        with open(TASK_PATH, "r") as f:
-            return json.load(f)
-    except:
-        return []
+    text = message.lower()
 
+    triggers = [
 
-def save_tasks(tasks):
-    with open(TASK_PATH, "w") as f:
-        json.dump(tasks, f, indent=2)
+        "task",
+        "tasks",
+        "todo",
+        "to do",
+        "reminder",
+        "reminders",
+        "check my tasks",
+        "show my tasks",
+        "tania"
 
+    ]
 
-def create_task(text):
-    tasks = load_tasks()
+    return any(
+        t in text
+        for t in triggers
+    )
 
-    task = {
-        "task": text,
-        "status": "pending",
-        "created_at": datetime.now().isoformat()
-    }
+# =====================================================
+# GET TASKS
+# =====================================================
 
-    tasks.append(task)
-    save_tasks(tasks)
+def get_tasks():
 
-    return f"Got it. I've added '{text}' as a task."
+    service = get_google_service(
+        "tasks",
+        "v1"
+    )
 
+    tasklists = (
+        service.tasklists()
+        .list()
+        .execute()
+    )
 
-def list_tasks():
-    tasks = load_tasks()
+    lists = tasklists.get(
+        "items",
+        []
+    )
+
+    all_tasks = []
+
+    for tasklist in lists:
+
+        tasks = (
+            service.tasks()
+            .list(
+                tasklist=tasklist["id"]
+            )
+            .execute()
+        )
+
+        items = tasks.get(
+            "items",
+            []
+        )
+
+        for t in items:
+
+            all_tasks.append({
+
+                "title":
+                    t.get(
+                        "title",
+                        "Untitled"
+                    ),
+
+                "status":
+                    t.get(
+                        "status",
+                        "unknown"
+                    )
+
+            })
+
+    return all_tasks
+
+# =====================================================
+# FORMAT TASKS
+# =====================================================
+
+def summarize_tasks(tasks):
 
     if not tasks:
-        return "You have no tasks right now."
 
-    response = "Here’s what we’ve got:\n\n"
+        return """
 
-    for i, t in enumerate(tasks, 1):
-        if t["status"] == "pending":
-            response += f"{i}. {t['task']}\n"
+# ✅ Tania Tasks
 
-    return response
+No active tasks found.
+
+"""
+
+    output = """
+
+# ✅ Tania Tasks
+
+## 👀 Current Tasks
+
+"""
+
+    for t in tasks:
+
+        output += f"""
+
+- {t['title']}
+  → {t['status']}
+
+"""
+
+    return output
+
+# =====================================================
+# MAIN HANDLER
+# =====================================================
+
+def handle_task_request(message: str):
+
+    try:
+
+        tasks = get_tasks()
+
+        return summarize_tasks(
+            tasks
+        )
+
+    except Exception as e:
+
+        return f"""
+
+# ✅ Tania Tasks
+
+## ❌ Task Error
+
+{str(e)}
+
+"""

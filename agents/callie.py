@@ -1,125 +1,140 @@
-﻿import datetime
-import os
-import re
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
+from datetime import datetime
 
-# =========================
-# CONFIG
-# =========================
-BASE_DIR = os.path.dirname(__file__)
-CONFIG_PATH = os.path.abspath(os.path.join(BASE_DIR, "..", "configs"))
+from api.google_auth import (
+    get_google_service
+)
 
-SCOPES = [
-    "https://www.googleapis.com/auth/gmail.readonly",
-    "https://www.googleapis.com/auth/calendar",
-    "https://www.googleapis.com/auth/tasks"
-]
-# =========================
-# AUTH
-# =========================
-def get_service():
-    creds = None
+# =====================================================
+# ROUTING
+# =====================================================
 
-    token_path = os.path.join(CONFIG_PATH, "token.json")
-    creds_path = os.path.join(CONFIG_PATH, "credentials.json")
+def should_handle(message: str) -> bool:
 
-    if os.path.exists(token_path):
-        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+    text = message.lower()
 
-    if not creds:
-        flow = InstalledAppFlow.from_client_secrets_file(creds_path, SCOPES)
-        creds = flow.run_local_server(port=0)
+    triggers = [
 
-        with open(token_path, 'w') as token:
-            token.write(creds.to_json())
+        "calendar",
+        "schedule",
+        "appointment",
+        "appointments",
+        "meeting",
+        "meetings",
+        "event",
+        "events",
+        "what do i have on",
+        "what is on today",
+        "callie"
 
-    return build('calendar', 'v3', credentials=creds)
+    ]
 
-# =========================
-# PARSE DATE/TIME
-# =========================
-def parse_datetime(text):
-    now = datetime.datetime.now()
-    text = text.lower()
+    return any(
+        t in text
+        for t in triggers
+    )
 
-    if "tomorrow" in text:
-        day = now + datetime.timedelta(days=1)
-    else:
-        day = now
-
-    match = re.search(r'(\d{1,2})(?::(\d{2}))?\s*(am|pm)', text)
-
-    if match:
-        hour = int(match.group(1))
-        minute = int(match.group(2) or 0)
-        ampm = match.group(3)
-
-        if ampm == "pm" and hour != 12:
-            hour += 12
-        if ampm == "am" and hour == 12:
-            hour = 0
-    else:
-        hour = 9
-        minute = 0
-
-    return day.replace(hour=hour, minute=minute, second=0)
-
-# =========================
-# ADD EVENT
-# =========================
-def add_event(text):
-    service = get_service()
-
-    dt = parse_datetime(text)
-    title = re.sub(r'(tomorrow|today|at|\d{1,2}(:\d{2})?\s*(am|pm))', '', text, flags=re.IGNORECASE).strip()
-
-    event = {
-        'summary': title,
-        'start': {'dateTime': dt.isoformat(), 'timeZone': 'Australia/Brisbane'},
-        'end': {'dateTime': (dt + datetime.timedelta(hours=1)).isoformat(), 'timeZone': 'Australia/Brisbane'},
-    }
-
-    service.events().insert(calendarId='primary', body=event).execute()
-
-    return f"ðŸ“… Added: {title} at {dt.strftime('%I:%M %p')}"
-
-# =========================
+# =====================================================
 # LIST EVENTS
-# =========================
-def list_events():
-    service = get_service()
+# =====================================================
 
-    now = datetime.datetime.utcnow().isoformat() + 'Z'
+def get_events():
 
-    events = service.events().list(
-        calendarId='primary',
-        timeMin=now,
-        maxResults=5,
-        singleEvents=True,
-        orderBy='startTime'
-    ).execute().get('items', [])
+    service = get_google_service(
+        "calendar",
+        "v3"
+    )
+
+    now = datetime.utcnow().isoformat() + "Z"
+
+    results = (
+        service.events()
+        .list(
+            calendarId="primary",
+            timeMin=now,
+            maxResults=10,
+            singleEvents=True,
+            orderBy="startTime"
+        )
+        .execute()
+    )
+
+    events = results.get(
+        "items",
+        []
+    )
+
+    return events
+
+# =====================================================
+# FORMAT EVENTS
+# =====================================================
+
+def summarize_events(events):
 
     if not events:
-        return "No upcoming events."
 
-    output = "ðŸ“… Upcoming:\n"
+        return """
+
+# 📅 Callie Calendar
+
+No upcoming events found.
+
+"""
+
+    output = """
+
+# 📅 Callie Calendar
+
+## 👀 Upcoming Events
+
+"""
 
     for e in events:
-        start = e['start'].get('dateTime', e['start'].get('date'))
-        output += f"- {start} | {e['summary']}\n"
+
+        start = (
+            e["start"]
+            .get(
+                "dateTime",
+                e["start"].get("date")
+            )
+        )
+
+        title = e.get(
+            "summary",
+            "Untitled Event"
+        )
+
+        output += f"""
+
+- {start}
+  → {title}
+
+"""
 
     return output
 
-# =========================
+# =====================================================
 # MAIN HANDLER
-# =========================
-def handle_calendar(text):
+# =====================================================
 
-    text_lower = text.lower()
+def handle_calendar_request(message: str):
 
-    if "show" in text_lower or "what" in text_lower:
-        return list_events()
+    try:
 
-    return add_event(text)
+        events = get_events()
+
+        return summarize_events(
+            events
+        )
+
+    except Exception as e:
+
+        return f"""
+
+# 📅 Callie Calendar
+
+## ❌ Calendar Error
+
+{str(e)}
+
+"""
