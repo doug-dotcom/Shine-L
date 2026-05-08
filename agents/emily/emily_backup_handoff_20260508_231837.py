@@ -1,5 +1,3 @@
-import re
-
 from openai import OpenAI
 
 from api.google_auth import (
@@ -131,102 +129,6 @@ def get_emails(max_results=5):
     return emails
 
 # =====================================================
-# EVENT DETECTION
-# =====================================================
-
-def detect_calendar_items(emails):
-
-    findings = []
-
-    patterns = [
-
-        r'\bmeeting\b',
-        r'\bappointment\b',
-        r'\bschedule\b',
-        r'\bevent\b',
-        r'\bbooking\b',
-        r'\bzoom\b',
-        r'\bteams\b',
-        r'\bgoogle meet\b',
-        r'\bfriday\b',
-        r'\bmonday\b',
-        r'\btuesday\b',
-        r'\bwednesday\b',
-        r'\bthursday\b',
-        r'\bsaturday\b',
-        r'\bsunday\b'
-
-    ]
-
-    for e in emails:
-
-        text = (
-            e["subject"] + " " + e["snippet"]
-        ).lower()
-
-        score = 0
-
-        for p in patterns:
-
-            if re.search(p, text):
-                score += 1
-
-        if score >= 2:
-
-            findings.append({
-
-                "subject":
-                    e["subject"],
-
-                "from":
-                    e["from"],
-
-                "snippet":
-                    e["snippet"]
-
-            })
-
-    return findings
-
-# =====================================================
-# FORMAT CALENDAR HANDOFFS
-# =====================================================
-
-def build_handoff_section(findings):
-
-    if not findings:
-        return ""
-
-    output = """
-
-# 📅 Emily → Callie Handoff Suggestions
-
-Emily detected possible calendar-related emails.
-
-"""
-
-    for f in findings:
-
-        output += f"""
-
-## 👀 Possible Event
-
-From:
-{f['from']}
-
-Subject:
-{f['subject']}
-
-Snippet:
-{f['snippet']}
-
-📅 Send to Callie for calendar review?
-
-"""
-
-    return output
-
-# =====================================================
 # GPT SUMMARY
 # =====================================================
 
@@ -238,7 +140,7 @@ def summarize_emails(emails):
 
 # 📧 Emily Email
 
-No emails found.
+No emails found in inbox.
 
 """
 
@@ -342,19 +244,9 @@ def handle_email_request(message: str):
 
         emails = get_emails(5)
 
-        summary = summarize_emails(
+        return summarize_emails(
             emails
         )
-
-        findings = detect_calendar_items(
-            emails
-        )
-
-        handoffs = build_handoff_section(
-            findings
-        )
-
-        return summary + handoffs
 
     except Exception as e:
 
