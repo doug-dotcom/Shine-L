@@ -2,8 +2,6 @@ import os
 import json
 from typing import Optional
 
-from supabase import create_client
-
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
@@ -13,13 +11,13 @@ from google.auth.transport.requests import Request
 # CONFIG
 # =====================================================
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+BASE_DIR = os.path.dirname(__file__)
+ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
+CONFIG_DIR = os.path.join(ROOT_DIR, "configs")
 
-supabase = create_client(
-    SUPABASE_URL,
-    SUPABASE_KEY
-)
+os.makedirs(CONFIG_DIR, exist_ok=True)
+
+TOKEN_PATH = os.path.join(CONFIG_DIR, "google_token.json")
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
@@ -32,16 +30,10 @@ PUBLIC_BASE_URL = os.getenv(
 REDIRECT_URI = f"{PUBLIC_BASE_URL}/google/auth/callback"
 
 SCOPES = [
-
     "https://www.googleapis.com/auth/gmail.readonly",
-
     "https://www.googleapis.com/auth/calendar",
-
     "https://www.googleapis.com/auth/tasks"
-
 ]
-
-TOKEN_KEY = "google_shared_token"
 
 # =====================================================
 # CLIENT CONFIG
@@ -68,62 +60,23 @@ def get_client_config():
     }
 
 # =====================================================
-# TOKEN STORAGE — SUPABASE
+# TOKEN STORAGE
 # =====================================================
 
 def save_credentials(creds: Credentials):
 
-    token_json = creds.to_json()
-
-    existing = (
-        supabase.table("system_memory")
-        .select("*")
-        .eq("key", TOKEN_KEY)
-        .execute()
-    )
-
-    payload = {
-        "key": TOKEN_KEY,
-        "value": token_json
-    }
-
-    if existing.data:
-
-        (
-            supabase.table("system_memory")
-            .update(payload)
-            .eq("key", TOKEN_KEY)
-            .execute()
-        )
-
-    else:
-
-        (
-            supabase.table("system_memory")
-            .insert(payload)
-            .execute()
-        )
+    with open(TOKEN_PATH, "w", encoding="utf-8") as f:
+        f.write(creds.to_json())
 
 def load_credentials() -> Optional[Credentials]:
 
+    if not os.path.exists(TOKEN_PATH):
+        return None
+
     try:
 
-        result = (
-            supabase.table("system_memory")
-            .select("*")
-            .eq("key", TOKEN_KEY)
-            .execute()
-        )
-
-        if not result.data:
-            return None
-
-        token_json = result.data[0]["value"]
-
-        token_data = json.loads(token_json)
-
-        return Credentials.from_authorized_user_info(
-            token_data,
+        return Credentials.from_authorized_user_file(
+            TOKEN_PATH,
             SCOPES
         )
 
@@ -135,12 +88,8 @@ def load_credentials() -> Optional[Credentials]:
 
 def clear_credentials():
 
-    (
-        supabase.table("system_memory")
-        .delete()
-        .eq("key", TOKEN_KEY)
-        .execute()
-    )
+    if os.path.exists(TOKEN_PATH):
+        os.remove(TOKEN_PATH)
 
 # =====================================================
 # AUTH URL
