@@ -20,7 +20,7 @@
 
 body{
 
-    font-family:Arial, sans-serif;
+    font-family:Arial,sans-serif;
 
     background:linear-gradient(
         135deg,
@@ -76,15 +76,11 @@ body{
     border-radius:16px;
 
     margin:0 12px 12px 12px;
-
-    font-size:20px;
-
-    line-height:1.6;
 }
 
 .message{
 
-    margin-bottom:32px;
+    margin-bottom:36px;
 }
 
 .user{
@@ -93,9 +89,9 @@ body{
 
     font-weight:bold;
 
-    margin-bottom:10px;
+    margin-bottom:12px;
 
-    font-size:24px;
+    font-size:26px;
 }
 
 .bot{
@@ -104,57 +100,76 @@ body{
 
     font-weight:bold;
 
-    margin-bottom:10px;
+    margin-bottom:12px;
 
-    font-size:24px;
+    font-size:26px;
 }
 
 .msg-text{
 
-    white-space:pre-wrap;
+    white-space:normal;
 
-    line-height:1.8;
+    line-height:1.9;
 
     word-wrap:break-word;
 
     overflow-wrap:break-word;
 
-    margin-top:8px;
-
     font-size:20px;
+
+    color:white;
+}
+
+.msg-text p{
+
+    margin-bottom:22px;
 }
 
 .msg-text h1{
 
-    font-size:32px;
+    font-size:36px;
 
-    margin-top:24px;
+    margin-top:34px;
 
-    margin-bottom:16px;
+    margin-bottom:20px;
 
     color:#ffffff;
 }
 
 .msg-text h2{
 
-    font-size:28px;
+    font-size:30px;
 
-    margin-top:22px;
+    margin-top:30px;
 
-    margin-bottom:14px;
+    margin-bottom:18px;
 
     color:#ffffff;
 }
 
 .msg-text h3{
 
-    font-size:24px;
+    font-size:25px;
 
-    margin-top:20px;
+    margin-top:26px;
 
-    margin-bottom:12px;
+    margin-bottom:16px;
 
     color:#ffffff;
+}
+
+.msg-text ul{
+
+    margin-top:12px;
+
+    margin-bottom:24px;
+
+    padding-left:28px;
+}
+
+.msg-text li{
+
+    margin-bottom:12px;
 }
 
 .msg-text strong{
@@ -204,11 +219,6 @@ body{
     flex-shrink:0;
 }
 
-.upload-btn:active{
-
-    transform:scale(0.96);
-}
-
 input{
 
     flex:1;
@@ -247,11 +257,6 @@ button{
     flex-shrink:0;
 }
 
-button:active{
-
-    transform:scale(0.98);
-}
-
 @media(max-width:600px){
 
     .header{
@@ -261,22 +266,20 @@ button:active{
         padding:18px;
     }
 
-    .chat-box{
+    .msg-text{
 
-        font-size:18px;
+        font-size:21px;
+
+        line-height:2.0;
+    }
+
+    .chat-box{
 
         margin:0 8px 8px 8px;
 
         padding:16px;
 
         padding-bottom:120px;
-    }
-
-    .msg-text{
-
-        font-size:18px;
-
-        line-height:1.9;
     }
 
     .input-row{
@@ -288,27 +291,14 @@ button:active{
         );
     }
 
-    .upload-btn{
-
-        width:52px;
-
-        height:52px;
-
-        font-size:28px;
-    }
-
     input{
 
         font-size:16px;
-
-        padding:14px;
     }
 
     button{
 
         font-size:16px;
-
-        padding:14px 18px;
     }
 }
 
@@ -378,71 +368,82 @@ button:active{
 
 </div>
 
-<div
-    id="storyPanel"
-    style="
-        display:none;
-        position:fixed;
-        top:0;
-        right:0;
-        width:40%;
-        height:100%;
-        background:#0f172a;
-        overflow-y:auto;
-        z-index:999;
-        padding:20px;
-        border-left:2px solid #334155;
-    "
->
-
-    <div style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        margin-bottom:20px;
-    ">
-
-        <h2>Story Library</h2>
-
-        <button onclick="closeStories()">
-            Close
-        </button>
-
-    </div>
-
-    <div id="storyList"></div>
-
-</div>
-
 <script>
 
 function formatMessage(text){
 
-    return text
+    let html = text;
 
-        // line breaks
-        .replace(/\n/g, "<br>")
+    // headings
 
-        // bold markdown
-        .replace(/\*\*(.*?)\*\*/g,
-            "<strong>$1</strong>")
+    html = html.replace(
+        /^### (.*)$/gm,
+        "<h3>$1</h3>"
+    );
 
-        // headings
-        .replace(/^### (.*)$/gm,
-            "<h3>$1</h3>")
+    html = html.replace(
+        /^## (.*)$/gm,
+        "<h2>$1</h2>"
+    );
 
-        .replace(/^## (.*)$/gm,
-            "<h2>$1</h2>")
+    html = html.replace(
+        /^# (.*)$/gm,
+        "<h1>$1</h1>"
+    );
 
-        .replace(/^# (.*)$/gm,
-            "<h1>$1</h1>")
+    // bold
 
-        // bullet points
-        .replace(/^- (.*)$/gm,
-            "• $1");
+    html = html.replace(
+        /\*\*(.*?)\*\*/g,
+        "<strong>$1</strong>"
+    );
+
+    // bullet lists
+
+    html = html.replace(
+
+        /(?:^|\n)- (.*?)(?=\n|$)/g,
+
+        "<li>$1</li>"
+    );
+
+    // wrap list items in ul
+
+    html = html.replace(
+
+        /(<li>.*?<\/li>)/gs,
+
+        "<ul>$1</ul>"
+    );
+
+    // paragraphs
+
+    html = html
+        .split(/\n\s*\n/)
+        .map(block => {
+
+            if(
+                block.includes("<h") ||
+                block.includes("<ul>")
+            ){
+                return block;
+            }
+
+            return `<p>${block}</p>`;
+        })
+        .join("");
+
+    // single line breaks
+
+    html = html.replace(
+        /\n/g,
+        "<br>"
+    );
+
+    return html;
 }
 
-function addMessage(sender, text){
+function addMessage(sender,text){
 
     const chat =
         document.getElementById("chat");
@@ -515,14 +516,6 @@ async function sendMessage(){
                 })
             }
         );
-
-        if(!res.ok){
-
-            const text =
-                await res.text();
-
-            throw new Error(text);
-        }
 
         const data =
             await res.json();
