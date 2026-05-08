@@ -434,34 +434,6 @@ Australia/Brisbane
 
     intent = detect_intent(user_msg)
 
-    # =====================================================
-    # BRITTANY ROUTING V1
-    # =====================================================
-
-    if (
-        BRITTANY_AVAILABLE
-        and brittany_should_handle(user_msg)
-    ):
-
-        print("\n🌐 ROUTING TO BRITTANY BROWSER")
-
-        brittany_reply = brittany_investigate(
-            user_msg
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "🌐 Brittany Browser:\n\n"
-            + brittany_reply
-        )
-
-        return {
-            "reply":
-                "🌐 Brittany Browser:\n\n"
-                + brittany_reply
-        }
-
-
     if intent == "full_recall":
         matches = search_life_story(user_msg)
 
@@ -717,5 +689,4 @@ async def brittany_direct(req: ChatRequest):
     return {
         "reply": result
     }
-
 
