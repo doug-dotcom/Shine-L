@@ -105,7 +105,7 @@ def build_auth_url():
     scopes=SCOPES,
     redirect_uri=REDIRECT_URI,
     autogenerate_code_verifier=False
-)
+    )
 
     auth_url, state = flow.authorization_url(
         access_type="offline",
@@ -127,7 +127,7 @@ def handle_callback(full_callback_url: str):
     scopes=SCOPES,
     redirect_uri=REDIRECT_URI,
     autogenerate_code_verifier=False
-)
+    )
 
     flow.fetch_token(
         authorization_response=full_callback_url
