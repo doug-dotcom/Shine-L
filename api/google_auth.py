@@ -100,11 +100,12 @@ def clear_credentials():
 
 def build_auth_url():
 
-    flow = Flow.from_client_config(
-        get_client_config(),
-        scopes=SCOPES,
-        redirect_uri=REDIRECT_URI
-    )
+   flow = Flow.from_client_config(
+    get_client_config(),
+    scopes=SCOPES,
+    redirect_uri=REDIRECT_URI,
+    autogenerate_code_verifier=False
+)
 
     auth_url, state = flow.authorization_url(
         access_type="offline",
@@ -121,11 +122,12 @@ def build_auth_url():
 
 def handle_callback(full_callback_url: str):
 
-    flow = Flow.from_client_config(
-        get_client_config(),
-        scopes=SCOPES,
-        redirect_uri=REDIRECT_URI
-    )
+   flow = Flow.from_client_config(
+    get_client_config(),
+    scopes=SCOPES,
+    redirect_uri=REDIRECT_URI,
+    autogenerate_code_verifier=False
+)
 
     flow.fetch_token(
         authorization_response=full_callback_url
