@@ -387,92 +387,6 @@ def synthesize_research(message, findings):
         "confidence": 0.72
     }
 
-
-# =====================================================
-# LIVE WEB COGNITION
-# =====================================================
-
-import os
-import requests
-
-from tavily import TavilyClient
-
-TAVILY_API_KEY = os.getenv("TAVILY_API_KEY","")
-
-tavily = TavilyClient(
-    api_key=TAVILY_API_KEY
-)
-
-# =====================================================
-# LIVE WEB SEARCH
-# =====================================================
-
-def live_web_search(query):
-
-    try:
-
-        results = tavily.search(
-            query=query,
-            search_depth="advanced",
-            max_results=5
-        )
-
-        findings = []
-
-        for result in results.get("results", []):
-
-            findings.append({
-                "title": result.get("title",""),
-                "content": result.get("content",""),
-                "url": result.get("url","")
-            })
-
-        return findings
-
-    except Exception as e:
-
-        print("TAVILY ERROR:", e)
-
-        return []
-
-# =====================================================
-# SYNTHESIS
-# =====================================================
-
-def synthesize_live_results(query, findings):
-
-    if not findings:
-
-        return (
-            "I attempted to research this topic but could not retrieve live findings right now."
-        )
-
-    response = (
-        "Here’s what I found:\n\n"
-    )
-
-    for item in findings:
-
-        title = item.get("title","")
-        content = item.get("content","")
-
-        response += (
-            "• "
-            + title
-            + "\n"
-        )
-
-        response += (
-            content[:300]
-            + "\n\n"
-        )
-
-    response += (
-        "Overall these appear to be the strongest current findings available online."
-    )
-
-    return response
-
 # =====================================================
 # MAIN HANDLER
 # =====================================================
@@ -491,15 +405,6 @@ def handle_research_request(message: str):
 
     entry = save_research(message)
 
-    live_findings = live_web_search(message)
-
-    if live_findings:
-
-        return synthesize_live_results(
-            message,
-            live_findings
-        )
-
     findings = build_research_findings(
         message,
         entry.get("category","general")
@@ -511,5 +416,4 @@ def handle_research_request(message: str):
     )
 
     return synthesis.get("summary","")
-
 
