@@ -291,102 +291,6 @@ def build_research_response(entry):
         suggestions["general"]
     )
 
-
-# =====================================================
-# TRUE COGNITION SYNTHESIS
-# =====================================================
-
-def build_research_findings(message, category):
-
-    lower = message.lower()
-
-    findings = []
-
-    # =================================================
-    # TOW BALL
-    # =================================================
-
-    if (
-        "tow ball" in lower
-        or "towbar" in lower
-    ):
-
-        findings.append(
-            "Tow ball prices in Australia generally range from $80–$250 for basic tow balls."
-        )
-
-        findings.append(
-            "Full tow bar kits with installation commonly range from $700–$2000 depending on vehicle type."
-        )
-
-        findings.append(
-            "European vehicles and vehicles with advanced electronics are usually more expensive."
-        )
-
-        findings.append(
-            "Hayman Reese and TAG are two common Australian tow bar brands."
-        )
-
-    # =================================================
-    # AI / SHINE
-    # =================================================
-
-    elif (
-        "ai" in lower
-        or "shine" in lower
-        or "orchestra" in lower
-    ):
-
-        findings.append(
-            "Modern AI systems increasingly use multi-agent orchestration rather than single-model execution."
-        )
-
-        findings.append(
-            "Supervisor-style orchestration is becoming the preferred architecture for complex cognitive systems."
-        )
-
-        findings.append(
-            "Human-centered AI design focuses on reducing cognitive load and improving emotional safety."
-        )
-
-    # =================================================
-    # DEFAULT
-    # =================================================
-
-    else:
-
-        findings.append(
-            "This topic may benefit from deeper investigation and structured synthesis."
-        )
-
-    return findings
-
-
-def synthesize_research(message, findings):
-
-    summary = (
-        "Here’s what I found:\n\n"
-    )
-
-    for finding in findings:
-
-        summary += (
-            "- "
-            + finding
-            + "\n"
-        )
-
-    summary += (
-        "\nOverall this appears to be the strongest current direction based on available context."
-    )
-
-    return {
-        "type": "research",
-        "summary": summary,
-        "findings": findings,
-        "confidence": 0.72
-    }
-
 # =====================================================
 # MAIN HANDLER
 # =====================================================
@@ -405,15 +309,15 @@ def handle_research_request(message: str):
 
     entry = save_research(message)
 
-    findings = build_research_findings(
-        message,
-        entry.get("category","general")
+    strategy = build_research_response(entry)
+
+    return (
+        "# 🌐 Noelie Knowledge Research\n\n"
+        "Research investigation created successfully.\n\n"
+        "Research Topic:\n"
+        + entry.get("query","")
+        + "\n\nCategory: "
+        + entry.get("category","general")
+        + "\n\nStrategic Insight:\n"
+        + strategy
     )
-
-    synthesis = synthesize_research(
-        message,
-        findings
-    )
-
-    return synthesis.get("summary","")
-
