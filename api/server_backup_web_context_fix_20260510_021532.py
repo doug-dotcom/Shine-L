@@ -1793,17 +1793,7 @@ Instructions:
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": system_prompt},
-            web_context = ""
-
-try:
-    web_context = retrieval_result
-except:
-    web_context = ""
-
-messages.append({
-    "role": "user",
-    "content": user_msg + "\n\nLIVE WEB FINDINGS:\n" + str(web_context)
-}),
+            {"role": "user", "content": user_msg + "\n\nLIVE WEB FINDINGS:\n" + web_context},
         ],
     )
 
@@ -2238,7 +2228,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
