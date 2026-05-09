@@ -8,7 +8,6 @@ from openai import OpenAI
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 import os
-from retrieval import research_web
 import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -1010,56 +1009,6 @@ def root():
     }
 
 
-
-# =====================================================
-# LIVE_WEB_RETRIEVAL_V1
-# =====================================================
-
-WEB_KEYWORDS = [
-    "research",
-    "search",
-    "look up",
-    "find",
-    "check website",
-    "google",
-    "internet",
-    "latest",
-    "today",
-    "tomorrow",
-    "price",
-    "cost",
-    "fixtures",
-    "times"
-]
-
-def needs_web_search(user_msg):
-
-    msg = user_msg.lower()
-
-    return any(k in msg for k in WEB_KEYWORDS)
-
-def format_web_results(results):
-
-    if not results:
-        return "No live web findings found."
-
-    output = []
-
-    for r in results:
-
-        title = r.get("title", "")
-        url = r.get("url", "")
-        summary = r.get("summary", "")
-
-        output.append(
-            f"TITLE: {title}\n"
-            f"URL: {url}\n"
-            f"SUMMARY: {summary}\n"
-        )
-
-    return "\n\n".join(output)
-
-
 @app.post("/chat")
 async def chat(req: ChatRequest):
     user_msg = req.message
@@ -1793,7 +1742,7 @@ Instructions:
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_msg + "\n\nLIVE WEB FINDINGS:\n" + web_context},
+            {"role": "user", "content": user_msg},
         ],
     )
 
@@ -2228,7 +2177,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
