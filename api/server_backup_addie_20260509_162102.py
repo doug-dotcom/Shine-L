@@ -113,28 +113,6 @@ app.mount(
 
 
 
-
-# =========================================================
-# ADDIE TASK EXECUTION AGENT
-# =========================================================
-try:
-
-    from agents.addie.addie import (
-        should_handle as addie_should_handle
-    )
-
-    from agents.addie.addie import (
-        handle_task_request as addie_handle_task_request
-    )
-
-    ADDIE_AVAILABLE = True
-
-except Exception as e:
-
-    print("ADDIE IMPORT ERROR:", e)
-
-    ADDIE_AVAILABLE = False
-
 # =========================================================
 # EMME EMOTIONAL SUPPORT AGENT
 # =========================================================
@@ -668,34 +646,6 @@ Australia/Brisbane
 
 
 
-
-
-    # =====================================================
-    # ADDIE TASK ROUTING
-    # =====================================================
-
-    if (
-        ADDIE_AVAILABLE
-        and addie_should_handle(user_msg)
-    ):
-
-        print("\n✅ ROUTING TO ADDIE TASK EXECUTION")
-
-        addie_reply = addie_handle_task_request(
-            user_msg
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "✅ Addie Task Execution:\n\n"
-            + addie_reply
-        )
-
-        return {
-            "reply":
-                "✅ Addie Task Execution:\n\n"
-                + addie_reply
-        }
 
     # =====================================================
     # EMME EMOTIONAL ROUTING
@@ -1411,7 +1361,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
