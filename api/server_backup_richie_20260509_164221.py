@@ -116,28 +116,6 @@ app.mount(
 
 
 
-
-# =========================================================
-# RICHIE REFLECTIVE LEARNING AGENT
-# =========================================================
-try:
-
-    from agents.richie.richie import (
-        should_handle as richie_should_handle
-    )
-
-    from agents.richie.richie import (
-        handle_reflection_request
-    )
-
-    RICHIE_AVAILABLE = True
-
-except Exception as e:
-
-    print("RICHIE IMPORT ERROR:", e)
-
-    RICHIE_AVAILABLE = False
-
 # =========================================================
 # NOELIE KNOWLEDGE RESEARCH AGENT
 # =========================================================
@@ -737,34 +715,6 @@ Australia/Brisbane
 
 
 
-
-
-    # =====================================================
-    # RICHIE REFLECTION ROUTING
-    # =====================================================
-
-    if (
-        RICHIE_AVAILABLE
-        and richie_should_handle(user_msg)
-    ):
-
-        print("\n🪞 ROUTING TO RICHIE REFLECTIVE LEARNING")
-
-        richie_reply = handle_reflection_request(
-            user_msg
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "🪞 Richie Reflective Learning:\n\n"
-            + richie_reply
-        )
-
-        return {
-            "reply":
-                "🪞 Richie Reflective Learning:\n\n"
-                + richie_reply
-        }
 
     # =====================================================
     # NOELIE RESEARCH ROUTING
@@ -1561,7 +1511,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
