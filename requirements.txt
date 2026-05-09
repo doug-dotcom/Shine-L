@@ -6,3 +6,5 @@ tavily-python
 firecrawl-py
 beautifulsoup4
 requests
+
+PyMuPDF
