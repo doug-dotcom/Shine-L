@@ -1789,67 +1789,25 @@ Instructions:
     if detect_drift(user_msg):
         system_prompt += GROUNDING_RESPONSE
 
-    
-# =====================================================
-# LIVE WEB CONTEXT
-# =====================================================
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            web_context = ""
 
-web_context = ""
+try:
+    web_context = retrieval_result
+except:
+    web_context = ""
 
-if needs_web_search(user_msg):
+messages.append({
+    "role": "user",
+    "content": user_msg + "\n\nLIVE WEB FINDINGS:\n" + str(web_context)
+}),
+        ],
+    )
 
-    try:
-
-        print("\n🌐 LIVE WEB SEARCH ACTIVE")
-
-        retrieval_result = research_web(user_msg)
-
-        web_context = format_web_results(
-            retrieval_result
-        )
-
-    except Exception as e:
-
-        print(
-            "WEB SEARCH ERROR:",
-            e
-        )
-
-        web_context = "Live web retrieval failed."
-
-# =====================================================
-# BUILD MESSAGES
-# =====================================================
-
-messages = [
-
-    {
-        "role": "system",
-        "content": system_prompt
-    },
-
-    {
-        "role": "user",
-        "content":
-            user_msg
-            + "\n\nLIVE WEB FINDINGS:\n"
-            + web_context
-    }
-
-]
-
-# =====================================================
-# OPENAI RESPONSE
-# =====================================================
-
-response = client.chat.completions.create(
-
-    model="gpt-4o-mini",
-
-    messages=messages
-
-)
-reply = response.choices[0].message.content
+    reply = response.choices[0].message.content
 
     print("\nL RESPONSE:", reply)
 
@@ -2280,7 +2238,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
