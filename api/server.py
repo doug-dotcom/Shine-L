@@ -556,7 +556,34 @@ Australia/Brisbane
 
     intent = detect_intent(user_msg)
 
+    # =====================================================
+    # PIXIE IMAGE ROUTING
+    # =====================================================
 
+    if (
+    PIXIE_AVAILABLE
+    and pixie_should_handle(user_msg)
+    ):
+
+    print("\n🎨 ROUTING TO PIXIE")
+
+    result = pixie_create_image(
+        user_msg
+    )
+
+    return {
+        "reply":
+            result.get(
+                "reply",
+                "Pixie created an image."
+            ),
+
+        "image_url":
+            result.get(
+                "image_url",
+                ""
+            )
+    }
 
 
     # =====================================================
