@@ -1567,14 +1567,6 @@ Australia/Brisbane
     state = detect_emotional_state(user_msg)
     tone = generate_emotional_tone(state)
 
-    cognition_scores = score_cognition_domains(
-        user_msg
-    )
-
-    cognition_context = build_orchestra_context(
-        cognition_scores
-    )
-
     system_prompt = f"""
 You are L, Doug's personal AI companion.
 
@@ -1588,8 +1580,6 @@ Here is the current memory context:
 
 Tone instruction:
 {tone}
-
-{cognition_context}
 
 Instructions:
 - Use memory when answering.
@@ -2051,7 +2041,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
