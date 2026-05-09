@@ -3,7 +3,15 @@ import base64
 from datetime import datetime
 from openai import OpenAI
 
+# =====================================================
+# OPENAI CLIENT
+# =====================================================
+
 client = OpenAI()
+
+# =====================================================
+# PATHS
+# =====================================================
 
 ROOT_DIR = os.path.abspath(
     os.path.join(
@@ -23,11 +31,16 @@ os.makedirs(
     exist_ok=True
 )
 
+# =====================================================
+# PIXIE ROUTING
+# =====================================================
+
 def should_handle(message: str) -> bool:
 
     text = message.lower()
 
     triggers = [
+
         "pixie",
         "picture",
         "image",
@@ -39,6 +52,7 @@ def should_handle(message: str) -> bool:
         "map poster",
         "visual",
         "diagram"
+
     ]
 
     return any(
@@ -46,77 +60,149 @@ def should_handle(message: str) -> bool:
         for t in triggers
     )
 
+# =====================================================
+# CLEAN PROMPT
+# =====================================================
+
 def clean_prompt(message: str) -> str:
 
     prompt = message.strip()
 
-    prompt = prompt.replace(
-        "Pixie",
-        ""
-    ).replace(
-        "pixie",
-        ""
-    )
+    replacements = [
 
-    prompt = prompt.replace(
+        "Pixie",
+        "pixie",
         "create image",
-        ""
-    ).replace(
         "generate image",
-        ""
-    ).replace(
-        "make an image",
-        ""
-    )
+        "make an image"
+
+    ]
+
+    for r in replacements:
+
+        prompt = prompt.replace(r, "")
 
     prompt = prompt.strip()
 
     if not prompt:
 
         prompt = (
-            "Create a calm, clear, ADHD-friendly visual memory "
-            "anchor poster in Shine style."
+            "Create a calm, clear, ADHD-friendly "
+            "visual memory anchor poster in Shine style."
         )
 
     return prompt
 
+# =====================================================
+# CREATE IMAGE
+# =====================================================
+
 def create_image(message: str):
 
-    prompt = clean_prompt(message)
+    try:
 
-    response = client.images.generate(
-        model="gpt-image-1",
-        prompt=prompt,
-        size="1024x1024"
-    )
+        prompt = clean_prompt(message)
 
-    image_b64 = response.data[0].b64_json
+        print("\n🎨 PIXIE PROMPT:", prompt)
 
-    filename = (
-        "pixie_"
-        + datetime.now().strftime("%Y%m%d_%H%M%S")
-        + ".png"
-    )
+        # =================================================
+        # OPENAI IMAGE GENERATION
+        # =================================================
 
-    path = os.path.join(
-        IMAGE_DIR,
-        filename
-    )
-
-    with open(path, "wb") as f:
-
-        f.write(
-            base64.b64decode(
-                image_b64
-            )
+        response = client.images.generate(
+            model="gpt-image-1",
+            prompt=prompt,
+            size="1024x1024"
         )
 
-    return {
-        "reply": (
-            "# 🎨 Pixie Pictures\n\n"
-            "Image created successfully.\n\n"
-            "Prompt used:\n"
-            + prompt
-        ),
-        "image_url": "/generated_images/" + filename
-    }
+        print("\n🎨 PIXIE RESPONSE:")
+        print(response)
+
+        # =================================================
+        # SAFETY CHECK
+        # =================================================
+
+        if (
+            not response
+            or not response.data
+            or len(response.data) == 0
+        ):
+
+            return {
+                "reply":
+                    "❌ Pixie received no image data.",
+                "image_url": ""
+            }
+
+        image_b64 = response.data[0].b64_json
+
+        if not image_b64:
+
+            return {
+                "reply":
+                    "❌ Pixie image response was empty.",
+                "image_url": ""
+            }
+
+        # =================================================
+        # CREATE FILE NAME
+        # =================================================
+
+        filename = (
+            "pixie_"
+            + datetime.now().strftime("%Y%m%d_%H%M%S")
+            + ".png"
+        )
+
+        path = os.path.join(
+            IMAGE_DIR,
+            filename
+        )
+
+        # =================================================
+        # SAVE IMAGE
+        # =================================================
+
+        with open(path, "wb") as f:
+
+            f.write(
+                base64.b64decode(
+                    image_b64
+                )
+            )
+
+        print("\n🎨 PIXIE IMAGE SAVED:")
+        print(path)
+
+        # =================================================
+        # SUCCESS RESPONSE
+        # =================================================
+
+        return {
+
+            "reply": (
+                "# 🎨 Pixie Pictures\n\n"
+                "Image created successfully.\n\n"
+                "Prompt used:\n"
+                + prompt
+            ),
+
+            "image_url":
+                "/generated_images/" + filename
+
+        }
+
+    except Exception as e:
+
+        print("\n❌ PIXIE ERROR:")
+        print(str(e))
+
+        return {
+
+            "reply":
+                "❌ Pixie generation failed:\n\n"
+                + str(e),
+
+            "image_url": ""
+
+        }
