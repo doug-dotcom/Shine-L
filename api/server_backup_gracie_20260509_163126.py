@@ -114,28 +114,6 @@ app.mount(
 
 
 
-
-# =========================================================
-# GRACIE LEGACY BUILDER AGENT
-# =========================================================
-try:
-
-    from agents.gracie.gracie import (
-        should_handle as gracie_should_handle
-    )
-
-    from agents.gracie.gracie import (
-        handle_legacy_request
-    )
-
-    GRACIE_AVAILABLE = True
-
-except Exception as e:
-
-    print("GRACIE IMPORT ERROR:", e)
-
-    GRACIE_AVAILABLE = False
-
 # =========================================================
 # ADDIE TASK EXECUTION AGENT
 # =========================================================
@@ -691,34 +669,6 @@ Australia/Brisbane
 
 
 
-
-
-    # =====================================================
-    # GRACIE LEGACY ROUTING
-    # =====================================================
-
-    if (
-        GRACIE_AVAILABLE
-        and gracie_should_handle(user_msg)
-    ):
-
-        print("\n📖 ROUTING TO GRACIE LEGACY BUILDER")
-
-        gracie_reply = handle_legacy_request(
-            user_msg
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "📖 Gracie Legacy Builder:\n\n"
-            + gracie_reply
-        )
-
-        return {
-            "reply":
-                "📖 Gracie Legacy Builder:\n\n"
-                + gracie_reply
-        }
 
     # =====================================================
     # ADDIE TASK ROUTING
@@ -1461,7 +1411,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
