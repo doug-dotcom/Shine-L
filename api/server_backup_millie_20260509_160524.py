@@ -601,34 +601,6 @@ Australia/Brisbane
     
 
 
-
-    # =====================================================
-    # MILLIE MEMORY ROUTING
-    # =====================================================
-
-    if (
-        MILLIE_AVAILABLE
-        and millie_should_handle(user_msg)
-    ):
-
-        print("\n🧠 ROUTING TO MILLIE MEMORY KEEPER")
-
-        millie_reply = handle_memory_request(
-            user_msg
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "🧠 Millie Memory Keeper:\n\n"
-            + millie_reply
-        )
-
-        return {
-            "reply":
-                "🧠 Millie Memory Keeper:\n\n"
-                + millie_reply
-        }
-
     # =====================================================
     # PIXIE IMAGE ROUTING
     # =====================================================
@@ -1289,7 +1261,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
