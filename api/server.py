@@ -565,9 +565,9 @@ Australia/Brisbane
     and pixie_should_handle(user_msg)
     ):
 
-    print("\n🎨 ROUTING TO PIXIE")
+        print("\n🎨 ROUTING TO PIXIE")
 
-    result = pixie_create_image(
+        result = pixie_create_image(
         user_msg
     )
 
