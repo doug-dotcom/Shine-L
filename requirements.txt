@@ -10,3 +10,5 @@ requests
 PyMuPDF
 
 supabase
+
+python-multipart
