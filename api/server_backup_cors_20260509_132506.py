@@ -69,26 +69,6 @@ except Exception as e:
     PIXIE_AVAILABLE = False
 
 app = FastAPI()
-
-# =====================================================
-# STATIC IMAGE CORS FIX
-# =====================================================
-
-from fastapi.responses import Response
-
-@app.middleware("http")
-async def add_cors_headers(request, call_next):
-
-    response = await call_next(request)
-
-    response.headers["Access-Control-Allow-Origin"] = "*"
-
-    response.headers["Access-Control-Allow-Methods"] = "*"
-
-    response.headers["Access-Control-Allow-Headers"] = "*"
-
-    return response
-
 app.add_middleware(HTTPSRedirectMiddleware)
 client = OpenAI()
 
@@ -182,22 +162,10 @@ except Exception as e:
 
 app.add_middleware(
     CORSMiddleware,
-
-    allow_origins=[
-
-        "https://shine-l.netlify.app",
-
-        "https://shine-l-production.up.railway.app"
-
-    ],
-
-    allow_credentials=True,
-
+    allow_origins=["https://shine-l.netlify.app"],
+    allow_credentials=False,
     allow_methods=["*"],
-
     allow_headers=["*"],
-
-    expose_headers=["*"]
 )
 
 UPLOAD_DIR = "uploads"
@@ -1255,7 +1223,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
