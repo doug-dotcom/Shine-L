@@ -829,25 +829,10 @@ Australia/Brisbane
             + fiona_reply
         )
 
-        log_orchestra_event(
-            "Fiona",
-            user_msg,
-            fiona_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Fiona",
-            fiona_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "💰 Fiona Finance:\n\n"
+                + fiona_reply
         }
 
     # =====================================================
@@ -871,25 +856,10 @@ Australia/Brisbane
             + winnie_reply
         )
 
-        log_orchestra_event(
-            "Winnie",
-            user_msg,
-            winnie_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Winnie",
-            winnie_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "💬 Winnie WhatsApp:\n\n"
+                + winnie_reply
         }
 
     # =====================================================
@@ -913,25 +883,10 @@ Australia/Brisbane
             + tegan_reply
         )
 
-        log_orchestra_event(
-            "Tegan",
-            user_msg,
-            tegan_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Tegan",
-            tegan_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "🔗 Tegan Integration Spine:\n\n"
+                + tegan_reply
         }
 
     # =====================================================
@@ -955,25 +910,10 @@ Australia/Brisbane
             + richie_reply
         )
 
-        log_orchestra_event(
-            "Richie",
-            user_msg,
-            richie_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Richie",
-            richie_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "🪞 Richie Reflective Learning:\n\n"
+                + richie_reply
         }
 
     # =====================================================
@@ -997,25 +937,10 @@ Australia/Brisbane
             + noelie_reply
         )
 
-        log_orchestra_event(
-            "Noelie",
-            user_msg,
-            noelie_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Noelie",
-            noelie_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "🌐 Noelie Knowledge Research:\n\n"
+                + noelie_reply
         }
 
     # =====================================================
@@ -1039,25 +964,10 @@ Australia/Brisbane
             + gracie_reply
         )
 
-        log_orchestra_event(
-            "Gracie",
-            user_msg,
-            gracie_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Gracie",
-            gracie_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "📖 Gracie Legacy Builder:\n\n"
+                + gracie_reply
         }
 
     # =====================================================
@@ -1081,25 +991,10 @@ Australia/Brisbane
             + addie_reply
         )
 
-        log_orchestra_event(
-            "Addie",
-            user_msg,
-            addie_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Addie",
-            addie_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "✅ Addie Task Execution:\n\n"
+                + addie_reply
         }
 
     # =====================================================
@@ -1123,25 +1018,10 @@ Australia/Brisbane
             + emme_reply
         )
 
-        log_orchestra_event(
-            "Emme",
-            user_msg,
-            emme_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Emme",
-            emme_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "❤️ Emme Emotional Support:\n\n"
+                + emme_reply
         }
 
     # =====================================================
@@ -1165,25 +1045,10 @@ Australia/Brisbane
             + millie_reply
         )
 
-        log_orchestra_event(
-            "Millie",
-            user_msg,
-            millie_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Millie",
-            millie_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "🧠 Millie Memory Keeper:\n\n"
+                + millie_reply
         }
 
     # =====================================================
@@ -1210,30 +1075,12 @@ Australia/Brisbane
                         "❌ Pixie returned no image result."
                 }
 
-            pixie_reply = result.get(
-                "reply",
-                "Pixie created an image."
-            )
-
-            log_orchestra_event(
-                "Pixie",
-                user_msg,
-                pixie_reply
-            )
-
-            final_reply = compose_l_response(
-                user_msg,
-                "Pixie",
-                pixie_reply
-            )
-
-            save_conversation_turn(
-                user_msg,
-                final_reply
-            )
-
             return {
-                "reply": final_reply,
+                "reply":
+                    result.get(
+                        "reply",
+                        "Pixie created an image."
+                    ),
 
                 "image_url":
                     result.get(
@@ -1276,25 +1123,10 @@ Australia/Brisbane
             + tania_reply
         )
 
-        log_orchestra_event(
-            "Tania",
-            user_msg,
-            tania_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Tania",
-            tania_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "✅ Tania Tasks:\n\n"
+                + tania_reply
         }
 
     # =====================================================
@@ -1318,25 +1150,10 @@ Australia/Brisbane
             + callie_reply
         )
 
-        log_orchestra_event(
-            "Callie",
-            user_msg,
-            callie_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Callie",
-            callie_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "📅 Callie Calendar:\n\n"
+                + callie_reply
         }
 
     # =====================================================
@@ -1360,25 +1177,10 @@ Australia/Brisbane
             + emily_reply
         )
 
-        log_orchestra_event(
-            "Emily",
-            user_msg,
-            emily_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Emily",
-            emily_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "📧 Emily Email:\n\n"
+                + emily_reply
         }
 
     # =====================================================
@@ -1402,25 +1204,10 @@ Australia/Brisbane
             + brittany_reply
         )
 
-        log_orchestra_event(
-            "Brittany",
-            user_msg,
-            brittany_reply
-        )
-
-        final_reply = compose_l_response(
-            user_msg,
-            "Brittany",
-            brittany_reply
-        )
-
-        save_conversation_turn(
-            user_msg,
-            final_reply
-        )
-
         return {
-            "reply": final_reply
+            "reply":
+                "🌐 Brittany Browser:\n\n"
+                + brittany_reply
         }
 
 
@@ -1924,7 +1711,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
