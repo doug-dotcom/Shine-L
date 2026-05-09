@@ -117,28 +117,6 @@ app.mount(
 
 
 
-
-# =========================================================
-# TEGAN INTEGRATION SPINE AGENT
-# =========================================================
-try:
-
-    from agents.tegan.tegan import (
-        should_handle as tegan_should_handle
-    )
-
-    from agents.tegan.tegan import (
-        handle_integration_request
-    )
-
-    TEGAN_AVAILABLE = True
-
-except Exception as e:
-
-    print("TEGAN IMPORT ERROR:", e)
-
-    TEGAN_AVAILABLE = False
-
 # =========================================================
 # RICHIE REFLECTIVE LEARNING AGENT
 # =========================================================
@@ -760,34 +738,6 @@ Australia/Brisbane
 
 
 
-
-
-    # =====================================================
-    # TEGAN INTEGRATION ROUTING
-    # =====================================================
-
-    if (
-        TEGAN_AVAILABLE
-        and tegan_should_handle(user_msg)
-    ):
-
-        print("\n🔗 ROUTING TO TEGAN INTEGRATION SPINE")
-
-        tegan_reply = handle_integration_request(
-            user_msg
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "🔗 Tegan Integration Spine:\n\n"
-            + tegan_reply
-        )
-
-        return {
-            "reply":
-                "🔗 Tegan Integration Spine:\n\n"
-                + tegan_reply
-        }
 
     # =====================================================
     # RICHIE REFLECTION ROUTING
@@ -1611,7 +1561,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
