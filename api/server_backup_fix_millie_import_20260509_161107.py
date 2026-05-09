@@ -111,28 +111,6 @@ app.mount(
 
 
 
-
-# =========================================================
-# MILLIE MEMORY KEEPER AGENT
-# =========================================================
-try:
-
-    from agents.millie.millie import (
-        should_handle as millie_should_handle
-    )
-
-    from agents.millie.millie import (
-        handle_memory_request
-    )
-
-    MILLIE_AVAILABLE = True
-
-except Exception as e:
-
-    print("MILLIE IMPORT ERROR:", e)
-
-    MILLIE_AVAILABLE = False
-
 # =========================================================
 # TANIA TASK AGENT
 # =========================================================
@@ -1311,7 +1289,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
