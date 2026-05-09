@@ -267,4 +267,3 @@ def create_image(message: str):
             "image_url": ""
 
         }
-
