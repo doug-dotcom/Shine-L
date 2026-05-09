@@ -556,11 +556,35 @@ Australia/Brisbane
 
     intent = detect_intent(user_msg)
 
-    
+    # =====================================================
+    # PIXIE IMAGE ROUTING
+    # =====================================================
 
+    if (
+    PIXIE_AVAILABLE
+    and pixie_should_handle(user_msg)
+    ):
 
+        print("\n🎨 ROUTING TO PIXIE")
 
-    
+        result = pixie_create_image(
+        user_msg
+    )
+
+    return {
+        "reply":
+            result.get(
+                "reply",
+                "Pixie created an image."
+            ),
+
+        "image_url":
+            result.get(
+                "image_url",
+                ""
+            )
+    }
+
 
 
     # =====================================================
@@ -574,45 +598,23 @@ Australia/Brisbane
 
         print("\n🎨 ROUTING TO PIXIE")
 
-        try:
+        result = pixie_create_image(
+            user_msg
+        )
 
-            result = pixie_create_image(
-                user_msg
-            )
+        return {
+            "reply":
+                result.get(
+                    "reply",
+                    "Pixie created an image."
+                ),
 
-            if not result:
-
-                return {
-                    "reply":
-                        "❌ Pixie returned no image result."
-                }
-
-            return {
-                "reply":
-                    result.get(
-                        "reply",
-                        "Pixie created an image."
-                    ),
-
-                "image_url":
-                    result.get(
-                        "image_url",
-                        ""
-                    )
-            }
-
-        except Exception as e:
-
-            print(
-                "PIXIE GENERATION ERROR:",
-                e
-            )
-
-            return {
-                "reply":
-                    "❌ Pixie generation failed:\n\n"
-                    + str(e)
-            }
+            "image_url":
+                result.get(
+                    "image_url",
+                    ""
+                )
+        }
 
     # =====================================================
     # TANIA TASK ROUTING
@@ -1223,7 +1225,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
