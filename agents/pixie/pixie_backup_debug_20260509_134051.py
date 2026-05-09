@@ -134,68 +134,7 @@ def create_image(message: str):
                 "image_url": ""
             }
 
-        # =================================================
-    # DEBUG RESPONSE STRUCTURE
-    # =================================================
-
-    print("\n🎨 RAW IMAGE RESPONSE:")
-    print(response)
-
-    image_data = response.data[0]
-
-    print("\n🎨 IMAGE DATA OBJECT:")
-    print(image_data)
-
-    image_url = getattr(
-        image_data,
-        "url",
-        None
-    )
-
-    image_b64 = getattr(
-        image_data,
-        "b64_json",
-        None
-    )
-
-    print("\n🎨 IMAGE URL:")
-    print(image_url)
-
-    print("\n🎨 HAS B64:")
-    print(bool(image_b64))
-
-    # =================================================
-    # HANDLE URL RESPONSE
-    # =================================================
-
-    if image_url and not image_b64:
-
-        return {
-
-            "reply": (
-                "# 🎨 Pixie Pictures\n\n"
-                "Image created successfully.\n\n"
-                "Using URL response mode."
-            ),
-
-            "image_url": image_url
-
-        }
-
-    # =================================================
-    # SAFETY CHECK
-    # =================================================
-
-    if not image_b64:
-
-        return {
-
-            "reply":
-                "❌ Pixie received no image payload.",
-
-            "image_url": ""
-
-        }
+        image_b64 = response.data[0].b64_json
 
         if not image_b64:
 
