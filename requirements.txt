@@ -1,3 +1,7 @@
+fastapi
+uvicorn
+openai
+python-dotenv
 tavily-python
 firecrawl-py
 beautifulsoup4
