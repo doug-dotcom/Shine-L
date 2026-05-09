@@ -112,28 +112,6 @@ app.mount(
 
 
 
-
-# =========================================================
-# EMME EMOTIONAL SUPPORT AGENT
-# =========================================================
-try:
-
-    from agents.emme.emme import (
-        should_handle as emme_should_handle
-    )
-
-    from agents.emme.emme import (
-        handle_emotional_request
-    )
-
-    EMME_AVAILABLE = True
-
-except Exception as e:
-
-    print("EMME IMPORT ERROR:", e)
-
-    EMME_AVAILABLE = False
-
 # =========================================================
 # MILLIE MEMORY KEEPER AGENT
 # =========================================================
@@ -645,34 +623,6 @@ Australia/Brisbane
     
 
 
-
-
-    # =====================================================
-    # EMME EMOTIONAL ROUTING
-    # =====================================================
-
-    if (
-        EMME_AVAILABLE
-        and emme_should_handle(user_msg)
-    ):
-
-        print("\n❤️ ROUTING TO EMME EMOTIONAL SUPPORT")
-
-        emme_reply = handle_emotional_request(
-            user_msg
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "❤️ Emme Emotional Support:\n\n"
-            + emme_reply
-        )
-
-        return {
-            "reply":
-                "❤️ Emme Emotional Support:\n\n"
-                + emme_reply
-        }
 
     # =====================================================
     # MILLIE MEMORY ROUTING
@@ -1361,7 +1311,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
