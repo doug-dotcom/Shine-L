@@ -95,6 +95,12 @@ client = OpenAI()
 # =========================================================
 # GENERATED IMAGE STATIC FILES
 # =========================================================
+
+os.makedirs(
+    "generated_images",
+    exist_ok=True
+)
+
 app.mount(
     "/generated_images",
     StaticFiles(directory="generated_images"),
