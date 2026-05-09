@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, HTMLResponse
 from pydantic import BaseModel
 from openai import OpenAI
@@ -46,41 +45,9 @@ except Exception as e:
 
     GOOGLE_AUTH_AVAILABLE = False
 
-
-# =========================================================
-# PIXIE PICTURES AGENT
-# =========================================================
-try:
-
-    from agents.pixie.pixie import (
-        should_handle as pixie_should_handle
-    )
-
-    from agents.pixie.pixie import (
-        create_image as pixie_create_image
-    )
-
-    PIXIE_AVAILABLE = True
-
-except Exception as e:
-
-    print("PIXIE IMPORT ERROR:", e)
-
-    PIXIE_AVAILABLE = False
-
 app = FastAPI()
 app.add_middleware(HTTPSRedirectMiddleware)
 client = OpenAI()
-
-# =========================================================
-# GENERATED IMAGE STATIC FILES
-# =========================================================
-app.mount(
-    "/generated_images",
-    StaticFiles(directory="generated_images"),
-    name="generated_images"
-)
-
 
 
 
@@ -1168,7 +1135,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
