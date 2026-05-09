@@ -32,82 +32,33 @@ os.makedirs(
 )
 
 # =====================================================
-# SMART SEMANTIC IMAGE ROUTER
+# PIXIE ROUTING
 # =====================================================
 
 def should_handle(message: str) -> bool:
 
     text = message.lower()
 
-    # =================================================
-    # IMAGE WORDS
-    # =================================================
+    triggers = [
 
-    image_words = [
-
-        "image",
+        "pixie",
         "picture",
-        "photo",
+        "image",
+        "create image",
+        "generate image",
+        "make an image",
+        "draw",
         "poster",
-        "art",
-        "drawing",
+        "map poster",
         "visual",
         "diagram"
 
     ]
 
-    # =================================================
-    # CREATION WORDS
-    # =================================================
-
-    action_words = [
-
-        "create",
-        "make",
-        "generate",
-        "draw",
-        "show",
-        "design"
-
-    ]
-
-    # =================================================
-    # PIXIE DIRECT CALL
-    # =================================================
-
-    if "pixie" in text:
-
-        return True
-
-    # =================================================
-    # SEMANTIC MATCH
-    # =================================================
-
-    has_image_word = any(
-        w in text
-        for w in image_words
+    return any(
+        t in text
+        for t in triggers
     )
-
-    has_action_word = any(
-        w in text
-        for w in action_words
-    )
-
-    # =================================================
-    # FINAL DECISION
-    # =================================================
-
-    return (
-        has_image_word
-        and has_action_word
-    )
-
-
-# =====================================================
-# PIXIE ROUTING
-# =====================================================
-
-
 
 # =====================================================
 # CLEAN PROMPT
@@ -316,5 +267,4 @@ def create_image(message: str):
             "image_url": ""
 
         }
-
 
