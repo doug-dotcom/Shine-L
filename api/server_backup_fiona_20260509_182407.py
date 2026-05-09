@@ -119,28 +119,6 @@ app.mount(
 
 
 
-
-# =========================================================
-# FIONA FINANCE AGENT
-# =========================================================
-try:
-
-    from agents.fiona.fiona import (
-        should_handle as fiona_should_handle
-    )
-
-    from agents.fiona.fiona import (
-        handle_finance_request
-    )
-
-    FIONA_AVAILABLE = True
-
-except Exception as e:
-
-    print("FIONA IMPORT ERROR:", e)
-
-    FIONA_AVAILABLE = False
-
 # =========================================================
 # WINNIE WHATSAPP AGENT
 # =========================================================
@@ -806,34 +784,6 @@ Australia/Brisbane
 
 
 
-
-
-    # =====================================================
-    # FIONA FINANCE ROUTING
-    # =====================================================
-
-    if (
-        FIONA_AVAILABLE
-        and fiona_should_handle(user_msg)
-    ):
-
-        print("\n💰 ROUTING TO FIONA FINANCE")
-
-        fiona_reply = handle_finance_request(
-            user_msg
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "💰 Fiona Finance:\n\n"
-            + fiona_reply
-        )
-
-        return {
-            "reply":
-                "💰 Fiona Finance:\n\n"
-                + fiona_reply
-        }
 
     # =====================================================
     # WINNIE WHATSAPP ROUTING
@@ -1711,7 +1661,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
