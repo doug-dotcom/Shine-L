@@ -118,28 +118,6 @@ app.mount(
 
 
 
-
-# =========================================================
-# WINNIE WHATSAPP AGENT
-# =========================================================
-try:
-
-    from agents.winnie.winnie import (
-        should_handle as winnie_should_handle
-    )
-
-    from agents.winnie.winnie import (
-        handle_whatsapp_request
-    )
-
-    WINNIE_AVAILABLE = True
-
-except Exception as e:
-
-    print("WINNIE IMPORT ERROR:", e)
-
-    WINNIE_AVAILABLE = False
-
 # =========================================================
 # TEGAN INTEGRATION SPINE AGENT
 # =========================================================
@@ -783,34 +761,6 @@ Australia/Brisbane
 
 
 
-
-
-    # =====================================================
-    # WINNIE WHATSAPP ROUTING
-    # =====================================================
-
-    if (
-        WINNIE_AVAILABLE
-        and winnie_should_handle(user_msg)
-    ):
-
-        print("\n💬 ROUTING TO WINNIE WHATSAPP")
-
-        winnie_reply = handle_whatsapp_request(
-            user_msg
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "💬 Winnie WhatsApp:\n\n"
-            + winnie_reply
-        )
-
-        return {
-            "reply":
-                "💬 Winnie WhatsApp:\n\n"
-                + winnie_reply
-        }
 
     # =====================================================
     # TEGAN INTEGRATION ROUTING
@@ -1661,7 +1611,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
