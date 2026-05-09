@@ -8,7 +8,7 @@ from openai import OpenAI
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 import os
-from retrieval import research_web
+from api.retrieval import research_web
 import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -2228,6 +2228,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
