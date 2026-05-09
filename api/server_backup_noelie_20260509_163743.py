@@ -115,28 +115,6 @@ app.mount(
 
 
 
-
-# =========================================================
-# NOELIE KNOWLEDGE RESEARCH AGENT
-# =========================================================
-try:
-
-    from agents.noelie.noelie import (
-        should_handle as noelie_should_handle
-    )
-
-    from agents.noelie.noelie import (
-        handle_research_request
-    )
-
-    NOELIE_AVAILABLE = True
-
-except Exception as e:
-
-    print("NOELIE IMPORT ERROR:", e)
-
-    NOELIE_AVAILABLE = False
-
 # =========================================================
 # GRACIE LEGACY BUILDER AGENT
 # =========================================================
@@ -714,34 +692,6 @@ Australia/Brisbane
 
 
 
-
-
-    # =====================================================
-    # NOELIE RESEARCH ROUTING
-    # =====================================================
-
-    if (
-        NOELIE_AVAILABLE
-        and noelie_should_handle(user_msg)
-    ):
-
-        print("\n🌐 ROUTING TO NOELIE KNOWLEDGE RESEARCH")
-
-        noelie_reply = handle_research_request(
-            user_msg
-        )
-
-        save_conversation_turn(
-            user_msg,
-            "🌐 Noelie Knowledge Research:\n\n"
-            + noelie_reply
-        )
-
-        return {
-            "reply":
-                "🌐 Noelie Knowledge Research:\n\n"
-                + noelie_reply
-        }
 
     # =====================================================
     # GRACIE LEGACY ROUTING
@@ -1511,7 +1461,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
