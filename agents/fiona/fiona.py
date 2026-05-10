@@ -1,284 +1,129 @@
-import os
-import json
-from collections import defaultdict
-from datetime import datetime
+# =========================================================
+# FIONA — CALM FINANCE ROUTING V1
+# =========================================================
 
-ROOT_DIR = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__),
-        "..",
-        ".."
-    )
-)
+FINANCE_KEYWORDS = {
 
-FINANCE_FILE = os.path.join(
-    ROOT_DIR,
-    "memory",
-    "fiona_finance.json"
-)
+    "budget": 4,
+    "bank": 4,
+    "mortgage": 5,
+    "loan": 5,
+    "debt": 5,
+    "credit": 4,
+    "finance": 5,
+    "financial": 5,
+    "investment": 4,
+    "income": 4,
+    "expenses": 4,
+    "expense": 4,
+    "tax": 4,
+    "super": 3,
+    "shares": 3,
+    "portfolio": 4,
+    "saving": 3,
+    "savings": 3,
+    "spending money": 5,
+    "cost": 3,
+    "pricing": 3,
+    "profit": 4,
+    "loss": 4
 
-os.makedirs(
-    os.path.dirname(FINANCE_FILE),
-    exist_ok=True
-)
+}
 
-# =====================================================
-# LOAD / SAVE
-# =====================================================
+SUPPRESSION_KEYWORDS = {
 
-def _load():
+    "kids": -4,
+    "children": -4,
+    "daughter": -4,
+    "son": -4,
+    "family": -3,
+    "love": -3,
+    "memory": -3,
+    "reflection": -3,
+    "proud": -3,
+    "time with": -6,
+    "spending time": -8,
+    "trampoline": -4,
+    "fishing": -3,
+    "feel": -2,
+    "emotion": -2,
+    "hug": -4
 
-    try:
+}
 
-        if not os.path.exists(FINANCE_FILE):
+TRIGGER_THRESHOLD = 5
 
-            return []
+# =========================================================
+# SHOULD HANDLE
+# =========================================================
 
-        with open(
-            FINANCE_FILE,
-            "r",
-            encoding="utf-8"
-        ) as f:
-
-            data = json.load(f)
-
-        if isinstance(data, list):
-
-            return data
-
-        return []
-
-    except Exception as e:
-
-        print("FIONA LOAD ERROR:", e)
-
-        return []
-
-
-def _save(data):
-
-    try:
-
-        with open(
-            FINANCE_FILE,
-            "w",
-            encoding="utf-8"
-        ) as f:
-
-            json.dump(
-                data,
-                f,
-                indent=2,
-                ensure_ascii=False
-            )
-
-    except Exception as e:
-
-        print("FIONA SAVE ERROR:", e)
-
-# =====================================================
-# ROUTING DETECTION
-# =====================================================
-
-def should_handle(message: str) -> bool:
+def should_handle(message: str):
 
     text = message.lower()
 
-    triggers = [
+    score = 0
 
-        "fiona",
-        "finance",
-        "spending",
-        "budget",
-        "money",
-        "expenses",
-        "financial",
-        "analyze spending",
-        "track spending",
-        "banking",
-        "cashflow"
+    positive_hits = []
+    suppression_hits = []
 
-    ]
+    # =====================================================
+    # POSITIVE SCORING
+    # =====================================================
 
-    return any(
-        phrase in text
-        for phrase in triggers
-    )
+    for keyword, value in FINANCE_KEYWORDS.items():
 
-# =====================================================
-# DETECT CATEGORY
-# =====================================================
+        if keyword in text:
 
-def detect_category(text):
+            score += value
 
-    lower = text.lower()
+            positive_hits.append(keyword)
 
-    categories = {
+    # =====================================================
+    # SUPPRESSION SCORING
+    # =====================================================
 
-        "food": [
-            "food",
-            "coffee",
-            "restaurant",
-            "cafe",
-            "ubereats"
-        ],
+    for keyword, value in SUPPRESSION_KEYWORDS.items():
 
-        "transport": [
-            "fuel",
-            "uber",
-            "taxi",
-            "transport"
-        ],
+        if keyword in text:
 
-        "subscriptions": [
-            "subscription",
-            "netflix",
-            "spotify",
-            "apple"
-        ],
+            score += value
 
-        "shopping": [
-            "shopping",
-            "amazon",
-            "store",
-            "purchase"
-        ]
-    }
+            suppression_hits.append(keyword)
 
-    for category, words in categories.items():
+    # =====================================================
+    # DEBUG OUTPUT
+    # =====================================================
 
-        if any(word in lower for word in words):
+    print("")
+    print("💰 FIONA ROUTING DEBUG")
+    print("MESSAGE:", message)
+    print("FINANCE SCORE:", score)
+    print("POSITIVE:", positive_hits)
+    print("SUPPRESSION:", suppression_hits)
 
-            return category
+    if score >= TRIGGER_THRESHOLD:
 
-    return "general"
+        print("✅ FIONA ACTIVATED")
+        return True
 
-# =====================================================
-# EXTRACT AMOUNT
-# =====================================================
+    print("🛑 FIONA SUPPRESSED")
+    return False
 
-def extract_amount(text):
-
-    import re
-
-    match = re.search(
-        r"\$?(\d+(\.\d+)?)",
-        text
-    )
-
-    if match:
-
-        try:
-
-            return float(match.group(1))
-
-        except:
-            return 0
-
-    return 0
-
-# =====================================================
-# SAVE TRANSACTION
-# =====================================================
-
-def save_transaction(message):
-
-    data = _load()
-
-    amount = extract_amount(message)
-
-    category = detect_category(message)
-
-    entry = {
-
-        "timestamp":
-            datetime.now().isoformat(),
-
-        "message":
-            message,
-
-        "amount":
-            amount,
-
-        "category":
-            category
-
-    }
-
-    data.append(entry)
-
-    _save(data)
-
-    return entry
-
-# =====================================================
-# BUILD FINANCE SUMMARY
-# =====================================================
-
-def build_summary():
-
-    data = _load()
-
-    if not data:
-
-        return (
-            "# 💰 Fiona Finance Cognition\n\n"
-            "No financial records stored yet."
-        )
-
-    total = sum(
-        d.get("amount",0)
-        for d in data
-    )
-
-    categories = defaultdict(float)
-
-    for d in data:
-
-        categories[
-            d.get("category","general")
-        ] += d.get("amount",0)
-
-    reply = "# 💰 Fiona Finance Cognition\n\n"
-
-    reply += (
-        f"Tracked Total: ${round(total,2)}\n\n"
-    )
-
-    reply += "## Spending Categories\n\n"
-
-    for category, amount in categories.items():
-
-        reply += (
-            f"- {category}: "
-            f"${round(amount,2)}\n"
-        )
-
-    return reply
-
-# =====================================================
-# MAIN HANDLER
+# =========================================================
+# HANDLE REQUEST
 # =====================================================
 
 def handle_finance_request(message: str):
 
-    text = message.lower()
+    return f"""
 
-    if (
-        "summary" in text
-        or "analyze" in text
-        or "show spending" in text
-    ):
+# 💰 Fiona Finance
 
-        return build_summary()
+I detected a finance-related request.
 
-    entry = save_transaction(message)
+Message:
+{message}
 
-    return (
-        "# 💰 Fiona Finance Cognition\n\n"
-        "Financial item recorded successfully.\n\n"
-        "Amount: $"
-        + str(entry.get("amount",0))
-        + "\n\nCategory: "
-        + entry.get("category","general")
-    )
+This is currently the calm routing version of Fiona.
+
+"""
