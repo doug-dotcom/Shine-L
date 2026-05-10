@@ -649,16 +649,6 @@ def save_to_life_story(title, content_text):
     stories.append(entry)
     safe_save_json(LIFE_STORY_FILE, stories)
 
-    audit_memory_event(
-        "save",
-        LIFE_STORY_FILE,
-        {
-            "title": title,
-            "characters": len(content_text),
-            "score": memory_score
-        }
-    )
-
 
 
 def save_conversation_turn(user_msg, assistant_reply):
@@ -685,15 +675,6 @@ def save_conversation_turn(user_msg, assistant_reply):
         safe_save_json(
             CONVERSATION_FILE,
             conversations
-        )
-
-        audit_memory_event(
-            "conversation_save",
-            CONVERSATION_FILE,
-            {
-                "user_chars": len(user_msg),
-                "assistant_chars": len(assistant_reply)
-            }
         )
 
     except Exception as e:
@@ -1018,135 +999,6 @@ def build_orchestra_context(scores):
 
     return context
 
-
-# =====================================================
-# MEMORY OBSERVABILITY V1
-# =====================================================
-
-MEMORY_AUDIT_FILE = "memory/memory_audit.json"
-
-def audit_memory_event(
-    event_type,
-    target,
-    details=None
-):
-
-    try:
-
-        audit = safe_load_json(
-            MEMORY_AUDIT_FILE,
-            []
-        )
-
-        audit.append({
-
-            "timestamp": str(datetime.now()),
-
-            "event_type": event_type,
-
-            "target": target,
-
-            "details": details or {}
-
-        })
-
-        safe_save_json(
-            MEMORY_AUDIT_FILE,
-            audit
-        )
-
-    except Exception as e:
-
-        print(
-            "MEMORY AUDIT ERROR:",
-            e
-        )
-
-
-def memory_file_status():
-
-    files = [
-
-        "memory/conversations.json",
-
-        "memory/life_story.json",
-
-        "memory/profile.json",
-
-        "memory/invisible_orchestra_log.json",
-
-        "memory/memory_audit.json"
-
-    ]
-
-    results = []
-
-    for path in files:
-
-        item = {
-
-            "file": path,
-
-            "exists": os.path.exists(path),
-
-            "size_bytes": 0,
-
-            "last_modified": None,
-
-            "entries": None
-
-        }
-
-        if os.path.exists(path):
-
-            item["size_bytes"] = os.path.getsize(path)
-
-            item["last_modified"] = str(
-                datetime.fromtimestamp(
-                    os.path.getmtime(path)
-                )
-            )
-
-            try:
-
-                data = safe_load_json(path, None)
-
-                if isinstance(data, list):
-
-                    item["entries"] = len(data)
-
-                elif isinstance(data, dict):
-
-                    item["entries"] = len(data.keys())
-
-            except:
-
-                item["entries"] = "unknown"
-
-        results.append(item)
-
-    return results
-
-
-def build_memory_audit_report():
-
-    audit = safe_load_json(
-        MEMORY_AUDIT_FILE,
-        []
-    )
-
-    recent = audit[-10:]
-
-    report = {
-
-        "memory_files": memory_file_status(),
-
-        "recent_events": recent
-
-    }
-
-    return report
-
 @app.get("/")
 def root():
     return {
@@ -1157,37 +1009,9 @@ def root():
     }
 
 
-
-@app.get("/memory/audit")
-def memory_audit():
-
-    return build_memory_audit_report()
-
 @app.post("/chat")
 async def chat(req: ChatRequest):
     user_msg = req.message
-
-    if user_msg.lower().strip() in [
-
-        "memory audit",
-
-        "memory status",
-
-        "show memory audit",
-
-        "show memory status"
-
-    ]:
-
-        report = build_memory_audit_report()
-
-        return {
-            "reply": json.dumps(
-                report,
-                indent=2,
-                ensure_ascii=False
-            )
-        }
 
     # ==========================================
     # LIVE BRISBANE TIME
@@ -2353,7 +2177,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 

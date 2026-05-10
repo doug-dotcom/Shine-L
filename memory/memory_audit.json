@@ -1,0 +1,42 @@
+
+# =====================================================
+# MEMORY OBSERVABILITY V1
+# =================================================
+# =========================================================
+# SHINE L — MEMORY OBSERVABILITY V1
+# HARD MEMORY AUDIT + DIAGNOSTICS
+# =========================================================
+
+$ROOT = "C:\Shine_L"
+$API = "$ROOT\api"
+$SERVER = "$API\server.py"
+$MEMORY = "$ROOT\memory"
+
+$STAMP = Get-Date -Format "yyyyMMdd_HHmmss"
+
+Write-Host ""
+Write-Host "====================================="
+Write-Host "MEMORY OBSERVABILITY V1"
+Write-Host "====================================="
+Write-Host ""
+
+# =========================================================
+# BACKUP
+# =========================================================
+
+Copy-Item `
+    $SERVER `
+    "$API\server_backup_memory_observability_$STAMP.py"
+
+Write-Host "✓ Backup created"
+
+# =========================================================
+# CREATE AUDIT FILE
+# =========================================================
+
+$AUDIT = "$MEMORY\memory_audit.json"
+
+if (!(Test-Path $AUDIT)) {
+
+@'
+[]
