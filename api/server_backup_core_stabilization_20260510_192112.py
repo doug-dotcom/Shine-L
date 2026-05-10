@@ -1265,42 +1265,6 @@ def format_hard_memory_audit_v2():
 
     return "\n".join(lines)
 
-
-# =====================================================
-# CORE STABILIZATION V1
-# =====================================================
-
-SYSTEM_STABILITY = {
-    "routing_stable": True,
-    "memory_observable": True,
-    "identity_guard_enabled": True,
-    "orchestra_mode": "invisible",
-    "soft_evolution_mode": False
-}
-
-def stabilize_response(reply):
-
-    if not reply:
-        return reply
-
-    fixes = {
-        "Your name is Tamara": "Your name is Doug Struthers",
-        "your name is Tamara": "your name is Doug Struthers",
-        "You are Tamara": "You are Doug Struthers",
-        "you are Tamara": "you are Doug Struthers",
-        "You have a brother named Doug": "You are Doug Struthers",
-        "you have a brother named Doug": "you are Doug Struthers",
-        "You served as a Family Physician": "You served as a Financial Planner",
-        "you served as a Family Physician": "you served as a Financial Planner"
-    }
-
-    cleaned = reply
-
-    for wrong, right in fixes.items():
-        cleaned = cleaned.replace(wrong, right)
-
-    return cleaned
-
 @app.get("/")
 def root():
     return {
@@ -1322,12 +1286,6 @@ def memory_audit():
 def memory_audit_v2():
 
     return hard_memory_audit_v2()
-
-
-@app.get("/system/stability")
-def system_stability():
-
-    return SYSTEM_STABILITY
 
 @app.post("/chat")
 async def chat(req: ChatRequest):
@@ -2113,8 +2071,6 @@ Instructions:
 
     reply = response.choices[0].message.content
 
-    reply = stabilize_response(reply)
-
     print("\nL RESPONSE:", reply)
 
     save_conversation_turn(
@@ -2544,7 +2500,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
