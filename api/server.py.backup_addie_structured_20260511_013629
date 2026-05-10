@@ -2071,19 +2071,20 @@ Australia/Brisbane
 
         save_conversation_turn(
             user_msg,
-            str(addie_reply)
+            "✅ Addie Task Execution:\n\n"
+            + addie_reply
         )
 
         log_orchestra_event(
             "Addie",
             user_msg,
-            str(addie_reply)
+            addie_reply
         )
 
         final_reply = compose_l_response(
             user_msg,
             "Addie",
-            str(addie_reply)
+            addie_reply
         )
 
         save_conversation_turn(
@@ -2972,7 +2973,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
