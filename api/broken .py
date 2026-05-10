@@ -8,6 +8,7 @@ from openai import OpenAI
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 import os
+from api.retrieval import research_web
 import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -1009,6 +1010,56 @@ def root():
     }
 
 
+
+# =====================================================
+# LIVE_WEB_RETRIEVAL_V1
+# =====================================================
+
+WEB_KEYWORDS = [
+    "research",
+    "search",
+    "look up",
+    "find",
+    "check website",
+    "google",
+    "internet",
+    "latest",
+    "today",
+    "tomorrow",
+    "price",
+    "cost",
+    "fixtures",
+    "times"
+]
+
+def needs_web_search(user_msg):
+
+    msg = user_msg.lower()
+
+    return any(k in msg for k in WEB_KEYWORDS)
+
+def format_web_results(results):
+
+    if not results:
+        return "No live web findings found."
+
+    output = []
+
+    for r in results:
+
+        title = r.get("title", "")
+        url = r.get("url", "")
+        summary = r.get("summary", "")
+
+        output.append(
+            f"TITLE: {title}\n"
+            f"URL: {url}\n"
+            f"SUMMARY: {summary}\n"
+        )
+
+    return "\n\n".join(output)
+
+
 @app.post("/chat")
 async def chat(req: ChatRequest):
     user_msg = req.message
@@ -1738,15 +1789,67 @@ Instructions:
     if detect_drift(user_msg):
         system_prompt += GROUNDING_RESPONSE
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_msg},
-        ],
-    )
+    
+# =====================================================
+# LIVE WEB CONTEXT
+# =====================================================
 
-    reply = response.choices[0].message.content
+web_context = ""
+
+if needs_web_search(user_msg):
+
+    try:
+
+        print("\n🌐 LIVE WEB SEARCH ACTIVE")
+
+        retrieval_result = research_web(user_msg)
+
+        web_context = format_web_results(
+            retrieval_result
+        )
+
+    except Exception as e:
+
+        print(
+            "WEB SEARCH ERROR:",
+            e
+        )
+
+        web_context = "Live web retrieval failed."
+
+# =====================================================
+# BUILD MESSAGES
+# =====================================================
+
+messages = [
+
+    {
+        "role": "system",
+        "content": system_prompt
+    },
+
+    {
+        "role": "user",
+        "content":
+            user_msg
+            + "\n\nLIVE WEB FINDINGS:\n"
+            + web_context
+    }
+
+]
+
+# =====================================================
+# OPENAI RESPONSE
+# =====================================================
+
+response = client.chat.completions.create(
+
+    model="gpt-4o-mini",
+
+    messages=messages
+
+)
+reply = response.choices[0].message.content
 
     print("\nL RESPONSE:", reply)
 
@@ -2177,6 +2280,11 @@ Would you like me to:
 """
 
     return None
+
+
+
+
+
 
 
 
