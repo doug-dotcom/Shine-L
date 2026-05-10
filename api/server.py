@@ -1352,7 +1352,7 @@ def calculate_agent_confidence(user_msg):
 
     ]
 
-    foreach ($null in @()) {}
+   
 
     for term in finance_terms:
 
