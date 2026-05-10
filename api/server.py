@@ -303,8 +303,7 @@ META_SUPPRESSION_TERMS = [
     "memory audit",
     "memory observability",
     "trigger logic",
-    "suppress
-ion logic",
+    "suppression logic",
     "weighted routing",
     "cognition",
     "hard fix",
