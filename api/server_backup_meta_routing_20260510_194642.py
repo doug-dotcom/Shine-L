@@ -1411,8 +1411,7 @@ Australia/Brisbane
     # =====================================================
 
     if (
-        not suppress_agent_routing(user_msg)
-        and FIONA_AVAILABLE
+        FIONA_AVAILABLE
         and fiona_should_handle(user_msg)
     ):
 
@@ -1538,8 +1537,7 @@ Australia/Brisbane
     # =====================================================
 
     if (
-        not suppress_agent_routing(user_msg)
-        and RICHIE_AVAILABLE
+        RICHIE_AVAILABLE
         and richie_should_handle(user_msg)
     ):
 
@@ -1581,8 +1579,7 @@ Australia/Brisbane
     # =====================================================
 
     if (
-        not suppress_agent_routing(user_msg)
-        and NOELIE_AVAILABLE
+        NOELIE_AVAILABLE
         and noelie_should_handle(user_msg)
     ):
 
@@ -1624,8 +1621,7 @@ Australia/Brisbane
     # =====================================================
 
     if (
-        not suppress_agent_routing(user_msg)
-        and GRACIE_AVAILABLE
+        GRACIE_AVAILABLE
         and gracie_should_handle(user_msg)
     ):
 
@@ -2548,7 +2544,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
