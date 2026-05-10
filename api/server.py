@@ -288,6 +288,54 @@ except Exception as e:
 
     EMME_AVAILABLE = False
 
+# =====================================================
+# META ROUTING SUPPRESSION
+# =====================================================
+
+META_SUPPRESSION_TERMS = [
+
+    "orchestration",
+    "routing",
+    "agent",
+    "agents",
+    "system design",
+    "architecture",
+    "memory audit",
+    "memory observability",
+    "trigger logic",
+    "suppress
+ion logic",
+    "weighted routing",
+    "cognition",
+    "hard fix",
+    "soft fix",
+    "backend",
+    "frontend",
+    "server.py",
+    "routes",
+    "engines",
+    "api"
+
+]
+
+def suppress_agent_routing(message):
+
+    text = message.lower()
+
+    for term in META_SUPPRESSION_TERMS:
+
+        if term in text:
+
+            print("")
+            print("🛑 META ROUTING SUPPRESSION ACTIVE")
+            print("TERM:", term)
+
+            return True
+
+    return False
+
+
+
 # =========================================================
 # MILLIE MEMORY KEEPER AGENT
 # =========================================================
@@ -1391,52 +1439,6 @@ Australia/Brisbane
     intent = detect_intent(user_msg)
 
     
-
-# =====================================================
-# META ROUTING SUPPRESSION
-# =====================================================
-
-META_SUPPRESSION_TERMS = [
-
-    "orchestration",
-    "routing",
-    "agent",
-    "agents",
-    "system design",
-    "architecture",
-    "memory audit",
-    "memory observability",
-    "trigger logic",
-    "suppression logic",
-    "weighted routing",
-    "cognition",
-    "hard fix",
-    "soft fix",
-    "backend",
-    "frontend",
-    "server.py",
-    "routes",
-    "engines",
-    "api"
-
-]
-
-def suppress_agent_routing(message):
-
-    text = message.lower()
-
-    for term in META_SUPPRESSION_TERMS:
-
-        if term in text:
-
-            print("")
-            print("🛑 META ROUTING SUPPRESSION ACTIVE")
-            print("TERM:", term)
-
-            return True
-
-    return False
-
     
     # =====================================================
     # FIONA FINANCE ROUTING
