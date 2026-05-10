@@ -1,5 +1,5 @@
-import os
 import json
+import os
 from datetime import datetime
 
 ROOT_DIR = os.path.abspath(
@@ -10,73 +10,8 @@ ROOT_DIR = os.path.abspath(
     )
 )
 
-TASK_FILE = os.path.join(
-    ROOT_DIR,
-    "memory",
-    "addie_tasks.json"
-)
-
-os.makedirs(
-    os.path.dirname(TASK_FILE),
-    exist_ok=True
-)
-
 # =====================================================
-# LOAD / SAVE
-# =====================================================
-
-def _load():
-
-    try:
-
-        if not os.path.exists(TASK_FILE):
-
-            return []
-
-        with open(
-            TASK_FILE,
-            "r",
-            encoding="utf-8"
-        ) as f:
-
-            data = json.load(f)
-
-        if isinstance(data, list):
-
-            return data
-
-        return []
-
-    except Exception as e:
-
-        print("ADDIE LOAD ERROR:", e)
-
-        return []
-
-
-def _save(data):
-
-    try:
-
-        with open(
-            TASK_FILE,
-            "w",
-            encoding="utf-8"
-        ) as f:
-
-            json.dump(
-                data,
-                f,
-                indent=2,
-                ensure_ascii=False
-            )
-
-    except Exception as e:
-
-        print("ADDIE SAVE ERROR:", e)
-
-# =====================================================
-# ROUTING DETECTION
+# ROUTING
 # =====================================================
 
 def should_handle(message: str) -> bool:
@@ -85,7 +20,6 @@ def should_handle(message: str) -> bool:
 
     triggers = [
 
-        "addie",
         "task",
         "todo",
         "to-do",
@@ -93,15 +27,14 @@ def should_handle(message: str) -> bool:
         "deadline",
         "follow up",
         "priority",
-        "important task",
         "track this",
-        "add this task"
+        "add task"
 
     ]
 
     return any(
-        phrase in text
-        for phrase in triggers
+        t in text
+        for t in triggers
     )
 
 # =====================================================
@@ -114,11 +47,12 @@ def clean_task(message: str):
 
     remove_words = [
 
-        "addie",
         "task",
-        "add this task",
+        "todo",
+        "to-do",
         "track this",
-        "remind me"
+        "remind me",
+        "add task"
 
     ]
 
@@ -130,7 +64,7 @@ def clean_task(message: str):
     return text.strip()
 
 # =====================================================
-# PRIORITY DETECTION
+# PRIORITY
 # =====================================================
 
 def detect_priority(message: str):
@@ -141,9 +75,9 @@ def detect_priority(message: str):
         word in text
         for word in [
             "urgent",
-            "asap",
+            "critical",
             "important",
-            "critical"
+            "asap"
         ]
     ):
         return "high"
@@ -161,98 +95,47 @@ def detect_priority(message: str):
     return "normal"
 
 # =====================================================
-# ADD TASK
+# BUILD TASK HANDOFF
 # =====================================================
 
-def add_task(message: str):
+def build_task_handoff(message: str):
 
-    tasks = _load()
-
-    clean = clean_task(message)
+    task = clean_task(message)
 
     priority = detect_priority(message)
 
-    entry = {
+    return {
 
         "timestamp":
             datetime.now().isoformat(),
 
         "task":
-            clean,
+            task,
 
         "priority":
             priority,
 
-        "status":
-            "open"
+        "source":
+            "Addie"
 
     }
 
-    tasks.append(entry)
-
-    _save(tasks)
-
-    return entry
-
 # =====================================================
-# LIST TASKS
-# =====================================================
-
-def list_tasks():
-
-    tasks = _load()
-
-    open_tasks = [
-
-        t for t in tasks
-        if t.get("status") == "open"
-
-    ]
-
-    if not open_tasks:
-
-        return (
-            "# ✅ Addie Task Execution\n\n"
-            "No active tasks currently."
-        )
-
-    reply = "# ✅ Addie Task Execution\n\n"
-
-    reply += "Current active tasks:\n\n"
-
-    for i, task in enumerate(open_tasks, start=1):
-
-        reply += (
-            f"{i}. "
-            + task.get("task", "")
-            + f" ({task.get('priority','normal')})\n"
-        )
-
-    return reply
-
-# =====================================================
-# MAIN HANDLER
+# MAIN
 # =====================================================
 
 def handle_task_request(message: str):
 
-    text = message.lower()
-
-    if (
-        "show tasks" in text
-        or "list tasks" in text
-        or "what are my tasks" in text
-    ):
-
-        return list_tasks()
-
-    entry = add_task(message)
-
-    return (
-        "# ✅ Addie Task Execution\n\n"
-        "Task added successfully.\n\n"
-        "Task:\n"
-        + entry.get("task","")
-        + "\n\nPriority: "
-        + entry.get("priority","normal")
+    handoff = build_task_handoff(
+        message
     )
+
+    return {
+
+        "status":
+            "handoff_ready",
+
+        "handoff":
+            handoff
+
+    }

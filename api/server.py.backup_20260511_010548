@@ -2065,47 +2065,13 @@ Australia/Brisbane
 
         print("\n✅ ROUTING TO ADDIE TASK EXECUTION")
 
-        addie_result = addie_handle_task_request(
+        addie_reply = addie_handle_task_request(
             user_msg
         )
 
-        handoff = addie_result.get(
-            "handoff",
-            {}
-        )
-
-        store_handoffs(
-            [],
-            [handoff]
-        )
-
-        execution_results = execute_task_handoffs()
-
-        execution = execution_results[0]
-
-        if execution.get("success"):
-
-            addie_reply = (
-                "# ✅ Addie + Tania\n\n"
-                "Task successfully executed.\n\n"
-                "Task:\n"
-                + execution["task"]["task"]
-                + "\n\nPriority: "
-                + execution["task"]["priority"]
-                + "\n\nProvider: "
-                + execution["task"]["provider"]
-            )
-
-        else:
-
-            addie_reply = (
-                "# ❌ Task Execution Failed\n\n"
-                + execution.get("error","Unknown error")
-            )
-
         save_conversation_turn(
             user_msg,
-            "✅ Addie + Tania:\n\n"
+            "✅ Addie Task Execution:\n\n"
             + addie_reply
         )
 
@@ -3007,7 +2973,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
