@@ -89,7 +89,7 @@ async def add_cors_headers(request, call_next):
 
     return response
 
-app.add_middleware(HTTPSRedirectMiddleware)
+# app.add_middleware(HTTPSRedirectMiddleware)
 client = OpenAI()
 
 # =========================================================
