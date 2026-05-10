@@ -1147,124 +1147,6 @@ def build_memory_audit_report():
 
     return report
 
-
-# =====================================================
-# MEMORY AUDIT V2 SOURCE ATTRIBUTION
-# =====================================================
-
-def hard_memory_audit_v2():
-
-    files = [
-        "memory/profile.json",
-        "memory/conversations.json",
-        "memory/life_story.json",
-        "memory/invisible_orchestra_log.json",
-        "memory/memory_audit.json"
-    ]
-
-    report = []
-    known_identity = {
-        "user_name": "Doug Struthers",
-        "not_user_name": "Tamara",
-        "children": ["Iyla", "Ashton", "Luella", "Mehlia"],
-        "identity_confidence": "high",
-        "source": "hard identity guard"
-    }
-
-    for path in files:
-
-        item = {
-            "source_file": path,
-            "exists": os.path.exists(path),
-            "entries": 0,
-            "size_bytes": 0,
-            "last_modified": None,
-            "notes": []
-        }
-
-        if os.path.exists(path):
-
-            item["size_bytes"] = os.path.getsize(path)
-            item["last_modified"] = str(
-                datetime.fromtimestamp(
-                    os.path.getmtime(path)
-                )
-            )
-
-            data = safe_load_json(path, None)
-
-            if isinstance(data, list):
-                item["entries"] = len(data)
-            elif isinstance(data, dict):
-                item["entries"] = len(data.keys())
-
-            # Identity contamination scan
-            blob = json.dumps(data, ensure_ascii=False).lower() if data else ""
-
-            if "your name is tamara" in blob:
-                item["notes"].append(
-                    "WARNING: possible identity contamination phrase found"
-                )
-
-            if "tamara" in blob:
-                item["notes"].append(
-                    "Tamara appears in this file; treat as relationship context, not user identity"
-                )
-
-            if "doug" in blob or "struthers" in blob:
-                item["notes"].append(
-                    "Doug identity reference found"
-                )
-
-        report.append(item)
-
-    return {
-        "audit_version": "Memory Audit V2",
-        "identity_guard": known_identity,
-        "memory_files": report,
-        "rule": "Do not infer user identity from relationship memories. Doug Struthers is the user. Tamara is not the user.",
-        "instruction": "If recall is uncertain, state the source file and confidence rather than guessing."
-    }
-
-
-def format_hard_memory_audit_v2():
-
-    audit = hard_memory_audit_v2()
-
-    lines = []
-    lines.append("MEMORY AUDIT V2 — SOURCE ATTRIBUTION")
-    lines.append("")
-    lines.append("IDENTITY GUARD")
-    lines.append("User: Doug Struthers")
-    lines.append("Not user: Tamara")
-    lines.append("Children: Iyla, Ashton, Luella, Mehlia")
-    lines.append("Confidence: high")
-    lines.append("")
-    lines.append("MEMORY FILES")
-
-    for item in audit["memory_files"]:
-
-        lines.append("")
-        lines.append("- " + item["source_file"])
-        lines.append("  exists: " + str(item["exists"]))
-        lines.append("  entries: " + str(item["entries"]))
-        lines.append("  size_bytes: " + str(item["size_bytes"]))
-        lines.append("  last_modified: " + str(item["last_modified"]))
-
-        if item["notes"]:
-            lines.append("  notes:")
-            for note in item["notes"]:
-                lines.append("    - " + note)
-
-    lines.append("")
-    lines.append("RULE")
-    lines.append("Do not infer Doug's identity from relationship memories.")
-    lines.append("Tamara may appear in memories, but Tamara is not the user.")
-    lines.append("")
-    lines.append("If memory recall is uncertain, say which file was searched and what confidence level was found.")
-
-    return "\n".join(lines)
-
 @app.get("/")
 def root():
     return {
@@ -1281,28 +1163,9 @@ def memory_audit():
 
     return build_memory_audit_report()
 
-
-@app.get("/memory/audit-v2")
-def memory_audit_v2():
-
-    return hard_memory_audit_v2()
-
 @app.post("/chat")
 async def chat(req: ChatRequest):
     user_msg = req.message
-
-    if user_msg.lower().strip() in [
-        "memory audit",
-        "memory audit please",
-        "memory status",
-        "show memory audit",
-        "show memory status",
-        "memory audit v2"
-    ]:
-
-        return {
-            "reply": format_hard_memory_audit_v2()
-        }
 
     if user_msg.lower().strip() in [
 
@@ -2030,16 +1893,6 @@ Tone instruction:
 
 {cognition_context}
 
-
-IDENTITY GUARD:
-- The user is Doug Struthers.
-- Tamara is not the user.
-- Tamara is a relationship/marriage context from Doug's life.
-- Never say Doug's name is Tamara.
-- If memory contains Tamara, treat it as relationship history only.
-- Children: Iyla, Ashton, Luella, Mehlia.
-- If unsure, say memory confidence is uncertain rather than guessing.
-
 Instructions:
 - Use memory when answering.
 - Use canonical profile facts as the highest authority.
@@ -2500,7 +2353,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
