@@ -1820,6 +1820,19 @@ Australia/Brisbane
         }
 
 
+    # =====================================================
+    # MODE SWITCH CHECK
+    # =====================================================
+
+    mode_result = apply_mode_change(user_msg)
+
+    if mode_result:
+
+        return {
+            "reply": mode_result
+        }
+
+
     intent = detect_intent(user_msg)
 
     
@@ -2570,6 +2583,7 @@ Instructions:
     reply = stabilize_response(reply)
 reply = process_communication_style(reply)
 reply = process_communication_style(reply)
+reply = process_communication_style(reply)
 
     print("\nL RESPONSE:", reply)
 
@@ -3000,6 +3014,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
