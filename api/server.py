@@ -1794,45 +1794,6 @@ Australia/Brisbane
 """
     print("\nUSER MESSAGE:", user_msg)
 
-    # =====================================================
-    # MODE SWITCH CHECK
-    # =====================================================
-
-    mode_result = apply_mode_change(user_msg)
-
-    if mode_result:
-
-        return {
-            "reply": mode_result
-        }
-
-
-    # =====================================================
-    # MODE SWITCH CHECK
-    # =====================================================
-
-    mode_result = apply_mode_change(user_msg)
-
-    if mode_result:
-
-        return {
-            "reply": mode_result
-        }
-
-
-    # =====================================================
-    # MODE SWITCH CHECK
-    # =====================================================
-
-    mode_result = apply_mode_change(user_msg)
-
-    if mode_result:
-
-        return {
-            "reply": mode_result
-        }
-
-
     intent = detect_intent(user_msg)
 
     
@@ -2104,25 +2065,60 @@ Australia/Brisbane
 
         print("\n✅ ROUTING TO ADDIE TASK EXECUTION")
 
-        addie_reply = addie_handle_task_request(
+        addie_result = addie_handle_task_request(
             user_msg
         )
 
+        handoff = addie_result.get(
+            "handoff",
+            {}
+        )
+
+        store_handoffs(
+            [],
+            [handoff]
+        )
+
+        execution_results = execute_task_handoffs()
+
+        execution = execution_results[0]
+
+        if execution.get("success"):
+
+            addie_reply = (
+                "# ✅ Addie + Tania\n\n"
+                "Task successfully executed.\n\n"
+                "Task:\n"
+                + execution["task"]["task"]
+                + "\n\nPriority: "
+                + execution["task"]["priority"]
+                + "\n\nProvider: "
+                + execution["task"]["provider"]
+            )
+
+        else:
+
+            addie_reply = (
+                "# ❌ Task Execution Failed\n\n"
+                + execution.get("error","Unknown error")
+            )
+
         save_conversation_turn(
             user_msg,
-            str(addie_reply)
+            "✅ Addie + Tania:\n\n"
+            + addie_reply
         )
 
         log_orchestra_event(
             "Addie",
             user_msg,
-            str(addie_reply)
+            addie_reply
         )
 
         final_reply = compose_l_response(
             user_msg,
             "Addie",
-            str(addie_reply)
+            addie_reply
         )
 
         save_conversation_turn(
@@ -2570,7 +2566,7 @@ Instructions:
     if detect_drift(user_msg):
         system_prompt += GROUNDING_RESPONSE
 
-   	 response = client.chat.completions.create(
+    response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": system_prompt},
@@ -2578,19 +2574,18 @@ Instructions:
         ],
     )
 
-    	reply = response.choices[0].message.content
+    reply = response.choices[0].message.content
 
-    	reply = stabilize_response(reply)
-    	reply = process_communication_style(reply)
+    reply = stabilize_response(reply)
 
-    	print("\nL RESPONSE:", reply)
+    print("\nL RESPONSE:", reply)
 
-    	save_conversation_turn(
-    	user_msg,
-    	reply
+    save_conversation_turn(
+        user_msg,
+        reply
     )
 
-	return {"reply": reply}
+    return {"reply": reply}
 
 
 @app.post("/upload")
@@ -2911,8 +2906,8 @@ def store_handoffs(calendar_items, task_items):
 
 def execute_task_handoffs():
 
-    from agents.tania.tania import (
-    create_task_from_handoff
+    from agents.tania import (
+        create_task_from_handoff
     )
 
     created = []
@@ -2931,7 +2926,7 @@ def execute_task_handoffs():
 
 def execute_calendar_handoffs():
 
-    from agents.callie.callie import (
+    from agents.callie import (
         create_event_from_handoff
     )
 
@@ -3012,9 +3007,6 @@ Would you like me to:
 """
 
     return None
-
-
-
 
 
 
