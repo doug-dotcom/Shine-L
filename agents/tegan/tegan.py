@@ -1,82 +1,11 @@
-import os
-import json
+from memory.memory_engine import (
+    _load_supabase_facts
+)
+
 from datetime import datetime
 
-ROOT_DIR = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__),
-        "..",
-        ".."
-    )
-)
-
-ORCH_FILE = os.path.join(
-    ROOT_DIR,
-    "memory",
-    "tegan_orchestration.json"
-)
-
-os.makedirs(
-    os.path.dirname(ORCH_FILE),
-    exist_ok=True
-)
-
 # =====================================================
-# LOAD / SAVE
-# =====================================================
-
-def _load():
-
-    try:
-
-        if not os.path.exists(ORCH_FILE):
-
-            return []
-
-        with open(
-            ORCH_FILE,
-            "r",
-            encoding="utf-8"
-        ) as f:
-
-            data = json.load(f)
-
-        if isinstance(data, list):
-
-            return data
-
-        return []
-
-    except Exception as e:
-
-        print("TEGAN LOAD ERROR:", e)
-
-        return []
-
-
-def _save(data):
-
-    try:
-
-        with open(
-            ORCH_FILE,
-            "w",
-            encoding="utf-8"
-        ) as f:
-
-            json.dump(
-                data,
-                f,
-                indent=2,
-                ensure_ascii=False
-            )
-
-    except Exception as e:
-
-        print("TEGAN SAVE ERROR:", e)
-
-# =====================================================
-# ROUTING DETECTION
+# ROUTING
 # =====================================================
 
 def should_handle(message: str) -> bool:
@@ -87,108 +16,79 @@ def should_handle(message: str) -> bool:
 
         "tegan",
         "ecosystem",
-        "orchestrate",
-        "coordination",
-        "system overview",
-        "agent overview",
-        "integration",
-        "workflow",
-        "how are the agents working",
+        "orchestration",
+        "system status",
+        "agent status",
         "ecosystem status",
-        "coordinate agents"
+        "memory status"
 
     ]
 
     return any(
-        phrase in text
-        for phrase in triggers
+        t in text
+        for t in triggers
     )
 
 # =====================================================
-# AGENT STATUS
+# AGENT STATES
 # =====================================================
 
 AGENTS = {
 
     "Millie":
-        "Memory & continuity",
+        "Connected to unified Supabase memory",
 
     "Emme":
-        "Emotional regulation",
+        "Emotional regulation online",
 
     "Addie":
-        "Task execution",
+        "Task execution online",
 
     "Gracie":
-        "Legacy preservation",
+        "Legacy workflows online",
 
     "Noelie":
-        "Knowledge research",
+        "Research cognition online",
 
     "Richie":
-        "Reflective learning"
+        "Reflective cognition online"
 
 }
 
 # =====================================================
-# SAVE ORCHESTRATION EVENT
-# =====================================================
-
-def save_event(message):
-
-    events = _load()
-
-    entry = {
-
-        "timestamp":
-            datetime.now().isoformat(),
-
-        "event":
-            message
-
-    }
-
-    events.append(entry)
-
-    _save(events)
-
-    return entry
-
-# =====================================================
-# BUILD ECOSYSTEM REPORT
+# BUILD REPORT
 # =====================================================
 
 def build_report():
 
-    reply = "# 🔗 Tegan Integration Spine\n\n"
+    facts = _load_supabase_facts(500)
 
-    reply += (
-        "The Shine ecosystem is online and coordinated.\n\n"
-    )
+    reply = ""
 
-    reply += "## Active Agents\n\n"
+    reply += "Shine ecosystem status:\n\n"
 
-    for name, role in AGENTS.items():
+    for name, state in AGENTS.items():
 
         reply += (
-            f"- {name} → {role}\n"
+            f"- {name}: {state}\n"
         )
 
-    reply += "\n## System Function\n\n"
+    reply += "\n"
 
     reply += (
-        "Tegan coordinates:\n"
-        "- cognition routing\n"
-        "- workflow orchestration\n"
-        "- context synchronization\n"
-        "- ecosystem continuity\n"
-        "- multi-agent collaboration\n"
+        f"Unified memory count: {len(facts)}\n"
     )
 
-    reply += "\n## Ecosystem Status\n\n"
+    reply += (
+        "Supabase memory spine: ONLINE\n"
+    )
 
     reply += (
-        "The ecosystem is stable and evolving coherently."
+        "Semantic memory: ACTIVE\n"
+    )
+
+    reply += (
+        "Orchestration spine: ACTIVE\n"
     )
 
     return reply
@@ -198,7 +98,5 @@ def build_report():
 # =====================================================
 
 def handle_integration_request(message: str):
-
-    save_event(message)
 
     return build_report()
