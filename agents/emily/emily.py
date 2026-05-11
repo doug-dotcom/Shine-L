@@ -305,8 +305,8 @@ def handle_email_request(message: str):
 
         emails = get_emails(8)
 
-        summary = summarize_emails(
-            emails
+        summary = executive_email_handler(
+            message
         )
 
         return summary
@@ -585,4 +585,367 @@ def auto_triage_emails(emails):
             stats["noise"] += 1
 
     return stats
+
+
+# =====================================================
+# EXECUTIVE PRIORITY SCORING
+# =====================================================
+
+def calculate_priority(email):
+
+    text = (
+        email.get("subject","")
+        + " "
+        + email.get("snippet","")
+        + " "
+        + email.get("body","")
+    ).lower()
+
+    score = 0
+
+    high_words = [
+
+        "urgent",
+        "asap",
+        "legal",
+        "deadline",
+        "court",
+        "claim",
+        "zurich",
+        "dva",
+        "invoice",
+        "payment",
+        "assessment",
+        "action required",
+        "follow up"
+
+    ]
+
+    medium_words = [
+
+        "meeting",
+        "appointment",
+        "review",
+        "school",
+        "important",
+        "reply",
+        "schedule"
+
+    ]
+
+    for w in high_words:
+
+        if w in text:
+
+            score += 3
+
+    for w in medium_words:
+
+        if w in text:
+
+            score += 1
+
+    return score
+
+# =====================================================
+# DETECT TASKS
+# =====================================================
+
+def detect_tasks(email):
+
+    text = (
+        email.get("subject","")
+        + " "
+        + email.get("body","")
+    ).lower()
+
+    triggers = [
+
+        "please",
+        "action required",
+        "follow up",
+        "deadline",
+        "reply",
+        "submit",
+        "review",
+        "complete",
+        "sign",
+        "pay"
+
+    ]
+
+    return any(
+        t in text
+        for t in triggers
+    )
+
+# =====================================================
+# DETECT CALENDAR ITEMS
+# =====================================================
+
+def detect_calendar(email):
+
+    text = (
+        email.get("subject","")
+        + " "
+        + email.get("body","")
+    ).lower()
+
+    triggers = [
+
+        "meeting",
+        "appointment",
+        "zoom",
+        "teams",
+        "google meet",
+        "schedule",
+        "calendar",
+        "friday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday"
+
+    ]
+
+    return any(
+        t in text
+        for t in triggers
+    )
+
+# =====================================================
+# THREAD RISK DETECTION
+# =====================================================
+
+def detect_thread_risk(email):
+
+    text = (
+        email.get("subject","")
+        + " "
+        + email.get("body","")
+    ).lower()
+
+    if (
+        "legal" in text
+        or "court" in text
+        or "breach" in text
+        or "complaint" in text
+        or "warning" in text
+    ):
+
+        return "high"
+
+    if (
+        "follow up" in text
+        or "urgent" in text
+        or "waiting" in text
+    ):
+
+        return "medium"
+
+    return "low"
+
+# =====================================================
+# EXECUTIVE SUMMARY
+# =====================================================
+
+def executive_summary(emails):
+
+    output = ""
+
+    output += "Executive Inbox Briefing\n\n"
+
+    high_priority = []
+    tasks = []
+    calendar = []
+
+    for email in emails:
+
+        priority = calculate_priority(email)
+
+        risk = detect_thread_risk(email)
+
+        if priority >= 3:
+
+            high_priority.append(email)
+
+        if detect_tasks(email):
+
+            tasks.append(email)
+
+        if detect_calendar(email):
+
+            calendar.append(email)
+
+    # ================================================
+    # HIGH PRIORITY
+    # ================================================
+
+    output += "TOP PRIORITIES\n\n"
+
+    if not high_priority:
+
+        output += "- No critical items detected.\n\n"
+
+    for e in high_priority:
+
+        output += (
+            "- "
+            + e.get("subject","")
+            + "\n"
+        )
+
+    # ================================================
+    # TASKS
+    # ================================================
+
+    output += "\nACTION ITEMS\n\n"
+
+    if not tasks:
+
+        output += "- No major tasks detected.\n\n"
+
+    for e in tasks:
+
+        output += (
+            "- "
+            + e.get("subject","")
+            + "\n"
+        )
+
+    # ================================================
+    # CALENDAR
+    # ================================================
+
+    output += "\nCALENDAR ITEMS\n\n"
+
+    if not calendar:
+
+        output += "- No meetings detected.\n\n"
+
+    for e in calendar:
+
+        output += (
+            "- "
+            + e.get("subject","")
+            + "\n"
+        )
+
+    return output
+
+# =====================================================
+# TRIAGE EXECUTION
+# =====================================================
+
+def execute_triage(emails):
+
+    stats = auto_triage_emails(emails)
+
+    return (
+
+        "Inbox triage completed.\n\n"
+
+        + "Actionable: "
+        + str(stats["action"])
+        + "\n"
+
+        + "Review: "
+        + str(stats["review"])
+        + "\n"
+
+        + "Noise: "
+        + str(stats["noise"])
+
+    )
+
+# =====================================================
+# DRAFT REPLY
+# =====================================================
+
+def draft_reply(email):
+
+    prompt = f"""
+
+You are Emily,
+Doug's executive inbox assistant.
+
+Draft a concise professional reply.
+
+EMAIL:
+
+FROM:
+{email.get("from","")}
+
+SUBJECT:
+{email.get("subject","")}
+
+BODY:
+{email.get("body","")}
+
+"""
+
+    response = client.chat.completions.create(
+
+        model="gpt-4o-mini",
+
+        messages=[
+
+            {
+                "role":"system",
+                "content":
+                "You are a concise executive assistant."
+            },
+
+            {
+                "role":"user",
+                "content": prompt
+            }
+
+        ],
+
+        temperature=0.3
+    )
+
+    return (
+        response
+        .choices[0]
+        .message
+        .content
+    )
+
+# =====================================================
+# EXECUTIVE HANDLER
+# =====================================================
+
+def executive_email_handler(message):
+
+    emails = get_emails(10)
+
+    text = message.lower()
+
+    # ================================================
+    # TRIAGE
+    # ================================================
+
+    if (
+        "triage" in text
+        or "organize" in text
+        or "sort my inbox" in text
+    ):
+
+        return execute_triage(emails)
+
+    # ================================================
+    # EXECUTIVE BRIEFING
+    # ================================================
+
+    if (
+        "briefing" in text
+        or "executive summary" in text
+    ):
+
+        return executive_summary(emails)
+
+    return summarize_emails(emails)
+
 
