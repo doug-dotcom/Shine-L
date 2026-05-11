@@ -2079,29 +2079,12 @@ Australia/Brisbane
             [handoff]
         )
 
-        execution_results = execute_task_handoffs()
-
-        execution = execution_results[0]
-
-        if execution.get("success"):
-
-            addie_reply = (
-                "# ✅ Addie + Tania\n\n"
-                "Task successfully executed.\n\n"
-                "Task:\n"
-                + execution["task"]["task"]
-                + "\n\nPriority: "
-                + execution["task"]["priority"]
-                + "\n\nProvider: "
-                + execution["task"]["provider"]
-            )
-
-        else:
-
-            addie_reply = (
-                "# ❌ Task Execution Failed\n\n"
-                + execution.get("error","Unknown error")
-            )
+        addie_reply = (
+            "# ✅ Addie Task Review\n\n"
+            "Task cognition active.\n\n"
+            "Automatic execution is currently disabled for safety.\n\n"
+            "Addie identified a task and is awaiting approval/execution layer completion."
+        )
 
         save_conversation_turn(
             user_msg,
@@ -3007,6 +2990,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
