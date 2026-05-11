@@ -2582,8 +2582,6 @@ Instructions:
 
     reply = stabilize_response(reply)
 reply = process_communication_style(reply)
-reply = process_communication_style(reply)
-reply = process_communication_style(reply)
 
     print("\nL RESPONSE:", reply)
 
