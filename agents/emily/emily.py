@@ -1,4 +1,5 @@
 import re
+import base64
 
 from openai import OpenAI
 
@@ -39,6 +40,58 @@ def should_handle(message: str) -> bool:
     )
 
 # =====================================================
+# BODY EXTRACTION
+# =====================================================
+
+def extract_plain_text(payload):
+
+    try:
+
+        body_data = (
+            payload
+            .get("body", {})
+            .get("data")
+        )
+
+        if body_data:
+
+            decoded = base64.urlsafe_b64decode(
+                body_data
+            ).decode("utf-8", errors="ignore")
+
+            return decoded
+
+        parts = payload.get("parts", [])
+
+        for part in parts:
+
+            mime = part.get("mimeType", "")
+
+            if mime == "text/plain":
+
+                data = (
+                    part
+                    .get("body", {})
+                    .get("data")
+                )
+
+                if data:
+
+                    decoded = base64.urlsafe_b64decode(
+                        data
+                    ).decode("utf-8", errors="ignore")
+
+                    return decoded
+
+        return ""
+
+    except Exception as e:
+
+        print("BODY EXTRACTION ERROR:", e)
+
+        return ""
+
+# =====================================================
 # GET EMAILS
 # =====================================================
 
@@ -75,12 +128,7 @@ def get_emails(max_results=5):
             .get(
                 userId="me",
                 id=msg["id"],
-                format="metadata",
-                metadataHeaders=[
-                    "From",
-                    "Subject",
-                    "Date"
-                ]
+                format="full"
             )
             .execute()
         )
@@ -100,6 +148,10 @@ def get_emails(max_results=5):
             h["name"]: h["value"]
             for h in headers
         }
+
+        payload = data.get("payload", {})
+
+        full_body = extract_plain_text(payload)
 
         emails.append({
 
@@ -125,200 +177,14 @@ def get_emails(max_results=5):
                 data.get(
                     "snippet",
                     ""
-                )
+                ),
+
+            "body":
+                full_body[:12000]
+
         })
 
     return emails
-
-# =====================================================
-# CALENDAR DETECTION
-# =====================================================
-
-def detect_calendar_items(emails):
-
-    findings = []
-
-    patterns = [
-
-        r'\bmeeting\b',
-        r'\bappointment\b',
-        r'\bschedule\b',
-        r'\bevent\b',
-        r'\bbooking\b',
-        r'\bzoom\b',
-        r'\bteams\b',
-        r'\bgoogle meet\b',
-        r'\bfriday\b',
-        r'\bmonday\b',
-        r'\btuesday\b',
-        r'\bwednesday\b',
-        r'\bthursday\b',
-        r'\bsaturday\b',
-        r'\bsunday\b'
-
-    ]
-
-    for e in emails:
-
-        text = (
-            e["subject"] + " " + e["snippet"]
-        ).lower()
-
-        score = 0
-
-        for p in patterns:
-
-            if re.search(p, text):
-                score += 1
-
-        if score >= 1:
-
-            findings.append({
-
-                "subject":
-                    e["subject"],
-
-                "from":
-                    e["from"],
-
-                "snippet":
-                    e["snippet"]
-
-            })
-
-    return findings
-
-# =====================================================
-# TASK DETECTION
-# =====================================================
-
-def detect_task_items(emails):
-
-    findings = []
-
-    patterns = [
-
-        r'\bplease\b',
-        r'\bsend\b',
-        r'\bcomplete\b',
-        r'\bfinish\b',
-        r'\bdeadline\b',
-        r'\bdue\b',
-        r'\baction required\b',
-        r'\bfollow up\b',
-        r'\brespond\b',
-        r'\breply\b',
-        r'\bpay\b',
-        r'\breview\b',
-        r'\bsubmit\b'
-
-    ]
-
-    for e in emails:
-
-        text = (
-            e["subject"] + " " + e["snippet"]
-        ).lower()
-
-        score = 0
-
-        for p in patterns:
-
-            if re.search(p, text):
-                score += 1
-
-        if score >= 1:
-
-            findings.append({
-
-                "subject":
-                    e["subject"],
-
-                "from":
-                    e["from"],
-
-                "snippet":
-                    e["snippet"]
-
-            })
-
-    return findings
-
-# =====================================================
-# CALENDAR HANDOFF
-# =====================================================
-
-def build_calendar_handoff(findings):
-
-    if not findings:
-        return ""
-
-    output = """
-
-# 📅 Emily → Callie Handoff Suggestions
-
-Emily detected possible calendar-related emails.
-
-"""
-
-    for f in findings:
-
-        output += f"""
-
-## 👀 Possible Event
-
-From:
-{f['from']}
-
-Subject:
-{f['subject']}
-
-Snippet:
-{f['snippet']}
-
-📅 Send to Callie for calendar review?
-
-"""
-
-    return output
-
-# =====================================================
-# TASK HANDOFF
-# =====================================================
-
-def build_task_handoff(findings):
-
-    if not findings:
-        return ""
-
-    output = """
-
-# ✅ Emily → Tania Task Suggestions
-
-Emily detected possible action items.
-
-"""
-
-    for f in findings:
-
-        output += f"""
-
-## 👀 Possible Task
-
-From:
-{f['from']}
-
-Subject:
-{f['subject']}
-
-Snippet:
-{f['snippet']}
-
-✅ Send to Tania for task creation?
-
-"""
-
-    return output
 
 # =====================================================
 # GPT SUMMARY
@@ -328,13 +194,9 @@ def summarize_emails(emails):
 
     if not emails:
 
-        return """
-
-# 📧 Emily Email
-
-No emails found.
-
-"""
+        return (
+            "No emails found."
+        )
 
     email_text = ""
 
@@ -347,50 +209,55 @@ No emails found.
 
 EMAIL {i}
 
-From:
+FROM:
 {e['from']}
 
-Subject:
+SUBJECT:
 {e['subject']}
 
-Date:
+DATE:
 {e['date']}
 
-Snippet:
+SNIPPET:
 {e['snippet']}
 
----
+FULL BODY:
+{e['body']}
+
+--------------------------------
+
 """
 
     prompt = f"""
 
-You are Emily Email,
-Doug's inbox assistant.
+You are Emily,
+Doug's executive inbox assistant.
 
-Your job:
-- identify important emails
+Your goals:
 - reduce overwhelm
-- separate signal from noise
+- identify true priorities
 - summarize clearly
+- explain important context
 - ADHD friendly formatting
+- separate noise from signal
 
 Output format:
 
-# 📧 Emily Email Summary
+# Inbox Summary
 
-## 🔥 Top Priorities
-
+## Top Priorities
 - ...
 
-## 👀 Inbox Overview
-
+## Important Context
 - ...
 
-## ✅ Suggested Actions
-
+## Action Items
 - ...
 
-EMAILS:
+## Low Priority / Noise
+- ...
+
+EMAIL DATA:
 
 {email_text}
 
@@ -404,18 +271,20 @@ EMAILS:
             messages=[
 
                 {
-                    "role":"system",
+                    "role": "system",
                     "content":
-                    "You are a structured inbox assistant."
+                    "You are a structured executive inbox assistant."
                 },
 
                 {
-                    "role":"user",
-                    "content":prompt
+                    "role": "user",
+                    "content": prompt
                 }
+
             ],
 
             temperature=0.2
+
         )
     )
 
@@ -434,45 +303,17 @@ def handle_email_request(message: str):
 
     try:
 
-        emails = get_emails(5)
+        emails = get_emails(8)
 
         summary = summarize_emails(
             emails
         )
 
-        calendar_items = detect_calendar_items(
-            emails
-        )
-
-        task_items = detect_task_items(
-            emails
-        )
-
-        calendar_handoffs = (
-            build_calendar_handoff(
-                calendar_items
-            )
-        )
-
-        task_handoffs = (
-            build_task_handoff(
-                task_items
-            )
-        )
-
-        return (
-            summary
-            + calendar_handoffs
-            + task_handoffs
-        )
+        return summary
 
     except Exception as e:
 
         return f"""
-
-# 📧 Emily Email
-
-## ❌ Gmail Connection Error
 
 Emily could not access Gmail.
 
