@@ -2581,16 +2581,16 @@ Instructions:
     reply = response.choices[0].message.content
 
     reply = stabilize_response(reply)
-reply = process_communication_style(reply)
+    reply = process_communication_style(reply)
 
     print("\nL RESPONSE:", reply)
 
     save_conversation_turn(
-        user_msg,
-        reply
+    user_msg,
+    reply
     )
 
-    return {"reply": reply}
+return {"reply": reply}
 
 
 @app.post("/upload")
