@@ -321,3 +321,268 @@ Error:
 {str(e)}
 
 """
+
+# =====================================================
+# LABEL LOOKUP
+# =====================================================
+
+def get_gmail_labels(service):
+
+    labels = (
+        service.users()
+        .labels()
+        .list(userId="me")
+        .execute()
+    )
+
+    output = {}
+
+    for label in labels.get("labels", []):
+
+        output[
+            label["name"]
+        ] = label["id"]
+
+    return output
+
+# =====================================================
+# APPLY LABEL
+# =====================================================
+
+def apply_label(service, msg_id, label_id):
+
+    try:
+
+        service.users().messages().modify(
+
+            userId="me",
+
+            id=msg_id,
+
+            body={
+                "addLabelIds": [label_id]
+            }
+
+        ).execute()
+
+        return True
+
+    except Exception as e:
+
+        print("LABEL ERROR:", e)
+
+        return False
+
+# =====================================================
+# REMOVE INBOX
+# =====================================================
+
+def remove_from_inbox(service, msg_id):
+
+    try:
+
+        service.users().messages().modify(
+
+            userId="me",
+
+            id=msg_id,
+
+            body={
+                "removeLabelIds": ["INBOX"]
+            }
+
+        ).execute()
+
+    except Exception as e:
+
+        print("REMOVE INBOX ERROR:", e)
+
+# =====================================================
+# TRIAGE CLASSIFIER
+# =====================================================
+
+def classify_email(email):
+
+    text = (
+        email.get("subject","")
+        + " "
+        + email.get("snippet","")
+        + " "
+        + email.get("body","")
+    ).lower()
+
+    # ================================================
+    # ACTIONABLE
+    # ================================================
+
+    action_words = [
+
+        "action required",
+        "please respond",
+        "deadline",
+        "appointment",
+        "meeting",
+        "legal",
+        "review request",
+        "invoice",
+        "payment due",
+        "urgent",
+        "follow up",
+        "dva",
+        "zurich",
+        "claim",
+        "school",
+        "form",
+        "assessment"
+
+    ]
+
+    # ================================================
+    # REVIEW
+    # ================================================
+
+    review_words = [
+
+        "newsletter",
+        "update",
+        "announcement",
+        "community",
+        "weekly",
+        "digest",
+        "report",
+        "summary"
+
+    ]
+
+    # ================================================
+    # NOISE
+    # ================================================
+
+    noise_words = [
+
+        "sale",
+        "offer",
+        "discount",
+        "promotion",
+        "deal",
+        "subscribe",
+        "gift",
+        "advertisement",
+        "marketing",
+        "last chance"
+
+    ]
+
+    if any(w in text for w in action_words):
+
+        return "action"
+
+    if any(w in text for w in review_words):
+
+        return "review"
+
+    if any(w in text for w in noise_words):
+
+        return "noise"
+
+    return "review"
+
+# =====================================================
+# AUTO TRIAGE
+# =====================================================
+
+def auto_triage_emails(emails):
+
+    service = get_google_service(
+        "gmail",
+        "v1"
+    )
+
+    labels = get_gmail_labels(service)
+
+    stats = {
+
+        "action": 0,
+        "review": 0,
+        "noise": 0
+
+    }
+
+    for email in emails:
+
+        msg_id = email.get("id")
+
+        category = classify_email(email)
+
+        # ============================================
+        # ACTION
+        # ============================================
+
+        if category == "action":
+
+            label = labels.get(
+                "Inbox/Action"
+            )
+
+            if label:
+
+                apply_label(
+                    service,
+                    msg_id,
+                    label
+                )
+
+            stats["action"] += 1
+
+        # ============================================
+        # REVIEW
+        # ============================================
+
+        elif category == "review":
+
+            label = labels.get(
+                "Emily Review"
+            )
+
+            if label:
+
+                apply_label(
+                    service,
+                    msg_id,
+                    label
+                )
+
+            remove_from_inbox(
+                service,
+                msg_id
+            )
+
+            stats["review"] += 1
+
+        # ============================================
+        # NOISE
+        # ============================================
+
+        elif category == "noise":
+
+            label = labels.get(
+                "Emily Email"
+            )
+
+            if label:
+
+                apply_label(
+                    service,
+                    msg_id,
+                    label
+                )
+
+            remove_from_inbox(
+                service,
+                msg_id
+            )
+
+            stats["noise"] += 1
+
+    return stats
+
