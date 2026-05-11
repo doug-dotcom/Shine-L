@@ -2570,7 +2570,7 @@ Instructions:
     if detect_drift(user_msg):
         system_prompt += GROUNDING_RESPONSE
 
-    response = client.chat.completions.create(
+   	 response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": system_prompt},
@@ -2578,19 +2578,19 @@ Instructions:
         ],
     )
 
-    reply = response.choices[0].message.content
+    	reply = response.choices[0].message.content
 
-    reply = stabilize_response(reply)
-    reply = process_communication_style(reply)
+    	reply = stabilize_response(reply)
+    	reply = process_communication_style(reply)
 
-    print("\nL RESPONSE:", reply)
+    	print("\nL RESPONSE:", reply)
 
-    save_conversation_turn(
-    user_msg,
-    reply
+    	save_conversation_turn(
+    	user_msg,
+    	reply
     )
 
-return {"reply": reply}
+	return {"reply": reply}
 
 
 @app.post("/upload")
