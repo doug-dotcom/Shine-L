@@ -2908,6 +2908,17 @@ IDENTITY GUARD:
 
 
 
+
+IMPORTANT MEMORY DOCTRINE:
+- Distinguish between:
+  - confirmed memory
+  - inferred context
+  - uncertain interpretation
+- Avoid overconfident relationship assumptions.
+- Emotional context does not automatically equal factual certainty.
+- Use calm ambiguity awareness when memory confidence is low.
+- High-quality cognition includes knowing what is uncertain.
+
 IMPORTANT CONTEXT DECAY DOCTRINE:
 - Specialist systems should not linger unnecessarily.
 - After a specialist task completes:
@@ -3036,6 +3047,18 @@ Instructions:
     reply = response.choices[0].message.content
 
     reply = stabilize_response(reply)
+
+    # =====================================================
+    # MEMORY CONFIDENCE + AMBIGUITY AWARENESS
+    # =====================================================
+
+    reply = apply_memory_confidence(
+        reply,
+        user_msg
+    )
+
+    print("")
+    print("🧠 MEMORY CONFIDENCE APPLIED")
 
     print("\nL RESPONSE:", reply)
 
@@ -3466,6 +3489,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
