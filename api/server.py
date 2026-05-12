@@ -9,6 +9,7 @@ from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 import os
 import json
+import random
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import shutil
@@ -1269,6 +1270,75 @@ def calculate_memory_confidence(matches):
         "confidence": confidence,
         "score": top_score
     }
+
+# =====================================================
+# MEMORY RELATIONSHIP INFERENCE HELPERS
+# =====================================================
+
+RELATIONSHIP_TERMS = [
+
+    "daughter",
+    "son",
+    "wife",
+    "husband",
+    "partner",
+    "girlfriend",
+    "boyfriend",
+    "mother",
+    "father",
+    "dog",
+    "cat",
+    "pet",
+    "friend"
+
+]
+
+UNCERTAINTY_PHRASES = [
+
+    "I may not fully understand the relationship context yet.",
+    "I want to avoid making assumptions about the relationship.",
+    "I understand this is important to you, though the context is still developing.",
+    "I may be interpreting some emotional context rather than confirmed memory."
+
+]
+
+def detect_relationship_inference(reply):
+
+    text = reply.lower()
+
+    score = 0
+
+    for term in RELATIONSHIP_TERMS:
+
+        if term in text:
+            score += 1
+
+    return score >= 1
+
+def detect_memory_uncertainty(user_msg):
+
+    text = user_msg.lower()
+
+    uncertainty_signals = [
+
+        "forgot to tell you",
+        "just remembered",
+        "i think",
+        "maybe",
+        "might",
+        "not sure"
+
+    ]
+
+    score = 0
+
+    for signal in uncertainty_signals:
+
+        if signal in text:
+            score += 1
+
+    return score >= 1
+
 def apply_memory_confidence(reply, user_msg):
 
     relationship_inference = detect_relationship_inference(
@@ -3507,6 +3577,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
