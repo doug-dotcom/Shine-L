@@ -15,13 +15,7 @@ def should_handle(message: str) -> bool:
     triggers = [
 
         "tegan",
-        "ecosystem",
-        "orchestration",
-        "system status",
-        "agent status",
-        "ecosystem status",
-        "memory status"
-
+        
     ]
 
     return any(
