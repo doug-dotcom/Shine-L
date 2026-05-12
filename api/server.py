@@ -1269,7 +1269,25 @@ def calculate_memory_confidence(matches):
         "confidence": confidence,
         "score": top_score
     }
+def apply_memory_confidence(reply, user_msg):
 
+    relationship_inference = detect_relationship_inference(
+        reply
+    )
+
+    uncertainty_detected = detect_memory_uncertainty(
+        user_msg
+    )
+
+    if relationship_inference and uncertainty_detected:
+
+        phrase = random.choice(
+            UNCERTAINTY_PHRASES
+        )
+
+        reply += "\n\n" + phrase
+
+    return reply
 
 def build_memory_confidence_layer(confidence_data):
 
