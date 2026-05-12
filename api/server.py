@@ -1865,6 +1865,119 @@ def specialist_complete(name):
 # CORE STABILIZATION V1
 # =====================================================
 
+
+# =====================================================
+# ASSISTANT TAIL SUPPRESSION V1
+# =====================================================
+
+ASSISTANT_TAIL_PATTERNS = [
+
+    "feel free to",
+    "let me know if",
+    "if you'd like",
+    "if you want",
+    "anything else",
+    "is there anything else",
+    "i'm here if",
+    "if you would like",
+    "happy to help further",
+    "would you like to explore",
+    "let me know what resonates",
+    "what would you like to discuss",
+    "if there’s anything specific",
+    "if there's anything specific",
+    "feel free to share"
+
+]
+
+COMPLETION_TRIGGERS = [
+
+    "great work",
+    "thanks",
+    "awesome",
+    "perfect",
+    "good job",
+    "well done",
+    "that makes sense",
+    "love it",
+    "exactly",
+    "beautiful",
+    "we did it",
+    "nailed it"
+
+]
+
+def detect_completion_state(user_msg, assistant_reply):
+
+    text = (
+        user_msg + " " + assistant_reply
+    ).lower()
+
+    score = 0
+
+    for trigger in COMPLETION_TRIGGERS:
+
+        if trigger in text:
+
+            score += 1
+
+    if len(assistant_reply.split()) < 120:
+
+        score += 1
+
+    return score >= 2
+
+def suppress_assistant_tail(reply):
+
+    if not reply:
+
+        return reply
+
+    lines = reply.splitlines()
+
+    cleaned = []
+
+    for line in lines:
+
+        lower = line.lower().strip()
+
+        suppress = False
+
+        for pattern in ASSISTANT_TAIL_PATTERNS:
+
+            if pattern in lower:
+
+                suppress = True
+                break
+
+        if not suppress:
+
+            cleaned.append(line)
+
+    reply = "\n".join(cleaned).strip()
+
+    # Clean dangling conversational endings
+    reply = reply.replace(
+        "If you need anything else, just let me know!",
+        ""
+    )
+
+    reply = reply.replace(
+        "Let me know!",
+        ""
+    )
+
+    reply = reply.replace(
+        "Feel free to share!",
+        ""
+    )
+
+    # Remove repeated empty lines
+    while "\n\n\n" in reply:
+        reply = reply.replace("\n\n\n", "\n\n")
+
+    return reply.strip()
+
 SYSTEM_STABILITY = {
     "routing_stable": True,
     "memory_observable": True,
@@ -2790,6 +2903,20 @@ IDENTITY GUARD:
 - Children: Iyla, Ashton, Luella, Mehlia.
 - If unsure, say memory confidence is uncertain rather than guessing.
 
+
+IMPORTANT CONVERSATIONAL DOCTRINE:
+- Not every response requires continuation.
+- Silence is allowed.
+- Completion is safe.
+- Do not reopen naturally completed conversations unnecessarily.
+- Avoid assistant-tail endings such as:
+  "let me know if"
+  "feel free to"
+  "anything else"
+  unless genuinely required.
+- Prioritize calm natural completion over endless continuation.
+- High-quality communication often feels lighter, calmer, and more complete.
+
 Instructions:
 - Use memory when answering.
 - Use canonical profile facts as the highest authority.
@@ -3267,6 +3394,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
