@@ -357,6 +357,27 @@ except Exception as e:
     MILLIE_AVAILABLE = False
 
 # =========================================================
+# SALLY SKILLS LIBRARIAN AGENT
+# =========================================================
+try:
+
+    from agents.sally.sally import (
+        should_handle as sally_should_handle
+    )
+
+    from agents.sally.sally import (
+        handle_skill_request
+    )
+
+    SALLY_AVAILABLE = True
+
+except Exception as e:
+
+    print("SALLY IMPORT ERROR:", e)
+
+    SALLY_AVAILABLE = False
+
+# =========================================================
 # TANIA TASK AGENT
 # =========================================================
 try:
@@ -2398,6 +2419,50 @@ Australia/Brisbane
                     "❌ Pixie generation failed:\n\n"
                     + str(e)
             }
+
+
+    # =====================================================
+    # SALLY SKILLS ROUTING
+    # =====================================================
+
+    if (
+        SALLY_AVAILABLE
+        and sally_should_handle(user_msg)
+    ):
+
+        print("\n📚 ROUTING TO SALLY SKILLS")
+
+        sally_reply = handle_skill_request(
+            user_msg
+        )
+
+        save_conversation_turn(
+            user_msg,
+            "📚 Sally Skills:\n\n"
+            + sally_reply
+        )
+
+        log_orchestra_event(
+            "Sally",
+            user_msg,
+            sally_reply
+        )
+
+        final_reply = compose_l_response(
+            user_msg,
+            "Sally",
+            sally_reply
+        )
+
+        save_conversation_turn(
+            user_msg,
+            final_reply
+        )
+
+        return {
+            "reply": final_reply
+        }
+
 
     # =====================================================
     # TANIA TASK ROUTING
