@@ -100,3 +100,4 @@ def build_report():
 def handle_integration_request(message: str):
 
     return build_report()
+
