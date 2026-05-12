@@ -83,15 +83,8 @@ def should_handle(message: str) -> bool:
 
     triggers = [
         "sally",
-        "skill",
-        "skills",
-        "skill library",
-        "capability library",
-        "what skills",
-        "show skills",
-        "skill audit",
-        "available skills",
-        "skill activation"
+        
+      
     ]
 
     return any(t in text for t in triggers)
