@@ -2906,6 +2906,30 @@ IDENTITY GUARD:
 
 
 
+
+IMPORTANT SYNTHESIS DOCTRINE:
+- Reflection should not merely restate events.
+- Prioritize:
+  - hidden patterns
+  - operational shifts
+  - architecture implications
+  - stabilizing factors
+  - contextual meaning
+- Avoid overly literal summaries.
+- Ask internally:
+  "What changed?"
+  "Why does this matter?"
+  "What is the deeper operational implication?"
+- High-quality synthesis should feel:
+  - insightful
+  - grounded
+  - contextual
+  - operationally meaningful
+rather than:
+  - repetitive
+  - literal
+  - surface-level
+
 IMPORTANT COMPLETION DOCTRINE:
 - Calm completion builds trust.
 - Silence is allowed.
@@ -3427,6 +3451,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
