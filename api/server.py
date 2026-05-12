@@ -17,6 +17,8 @@ import base64
 import fitz
 
 from memory.memory_engine import (
+    build_full_memory_audit,
+    get_memory_record_count,
     process,
     build_context,
     detect_emotional_state,
@@ -2455,7 +2457,31 @@ Timezone:
 Australia/Brisbane
 
 """
-    print("\nUSER MESSAGE:", user_msg)
+    print("\nUSER MESSAGE:", user_msg)`r`n
+    # =====================================================
+    # LIVE MEMORY AUDIT
+    # =====================================================
+
+    memory_audit_requests = [
+
+        "memory audit",
+        "full memory audit",
+        "live memory audit",
+        "memory count",
+        "how many memories",
+        "audit memory"
+
+    ]
+
+    if any(
+        x in user_msg.lower()
+        for x in memory_audit_requests
+    ):
+
+        return {
+            "reply": build_full_memory_audit()
+        }
+
 
     intent = detect_intent(user_msg)
 
@@ -3914,6 +3940,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 

@@ -709,3 +709,113 @@ def generate_emotional_tone(state):
 
 
 
+
+
+
+# =====================================================
+# LIVE MEMORY AUDIT V1
+# =====================================================
+
+def get_memory_record_count():
+
+    try:
+
+        memories = _load_supabase_facts()
+
+        if not memories:
+            return 0
+
+        return len(memories)
+
+    except Exception as e:
+
+        print("MEMORY COUNT ERROR:", e)
+
+        return 0
+
+def build_full_memory_audit():
+
+    try:
+
+        memories = _load_supabase_facts()
+
+        if not memories:
+
+            return (
+                "Memory Audit\n\n"
+                "No memories currently loaded."
+            )
+
+        total = len(memories)
+
+        categories = {}
+
+        types = {}
+
+        for item in memories:
+
+            category = item.get(
+                "category",
+                "unknown"
+            )
+
+            mem_type = item.get(
+                "type",
+                "unknown"
+            )
+
+            categories[category] = (
+                categories.get(category, 0) + 1
+            )
+
+            types[mem_type] = (
+                types.get(mem_type, 0) + 1
+            )
+
+        reply = "Memory Audit\n\n"
+
+        reply += (
+            "Total Supabase memories: "
+            + str(total)
+            + "\n\n"
+        )
+
+        reply += "By category:\n"
+
+        for key, value in sorted(
+            categories.items()
+        ):
+
+            reply += (
+                "- "
+                + str(key)
+                + ": "
+                + str(value)
+                + "\n"
+            )
+
+        reply += "\nBy type:\n"
+
+        for key, value in sorted(
+            types.items()
+        ):
+
+            reply += (
+                "- "
+                + str(key)
+                + ": "
+                + str(value)
+                + "\n"
+            )
+
+        return reply.strip()
+
+    except Exception as e:
+
+        print("FULL MEMORY AUDIT ERROR:", e)
+
+        return (
+            "Memory Audit\n\n"
+            "Audit failed to load."
+        )
+
