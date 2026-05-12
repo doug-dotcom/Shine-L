@@ -584,6 +584,55 @@ SEMANTIC_LINKS = {
 }
 
 
+
+# =====================================================
+# ECOSYSTEM AGENT STOCKTAKE V1
+# =====================================================
+
+def build_ecosystem_agent_stocktake():
+
+    return """
+Shine ecosystem agent stocktake:
+
+Core:
+- L: Primary companion identity and base cognition.
+
+Memory:
+- Millie: Memory keeper and continuity support.
+- Supabase Memory Spine: Persistent semantic memory storage and retrieval.
+
+Emotion:
+- Emme: Emotional regulation and nervous-system support.
+
+Execution:
+- Addie: Task planning and execution support.
+- Tania: Task creation and action handling.
+
+Calendar:
+- Callie: Calendar review and scheduling support.
+
+Email:
+- Emily: Gmail reading, full-email summaries, inbox triage, and email cognition.
+
+Legacy:
+- Gracie: Legacy preservation, life story, and family memory workflows.
+
+Research:
+- Noelie: Knowledge research and investigation support.
+- Brittany: Browser/research investigation support where available.
+
+Reflection:
+- Richie: Reflective learning, pattern recognition, and insight support.
+
+Orchestration:
+- Tegan: Integration spine and ecosystem coordination.
+- Sally: Skills librarian and external skill activation support.
+
+Important:
+Sally should support L quietly unless directly called.
+Skills should augment L, not replace L.
+"""
+
 def safe_load_json(path, fallback):
     try:
         if not os.path.exists(path):
@@ -3218,6 +3267,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 

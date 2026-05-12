@@ -286,3 +286,4 @@ def handle_skill_request(message: str):
         return list_skills()
 
     return skill_audit()
+
