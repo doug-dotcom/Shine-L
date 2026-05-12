@@ -27,5 +27,16 @@
       "Reflection Depth",
       "Inbox Triage"
     ]
+  },
+  {
+    "timestamp": "2026-05-12T22:09:51.960044",
+    "message_preview": "I am overwhelmed and need a short answer",
+    "activated": [
+      {
+        "name": "Emotional Resonance",
+        "score": 3,
+        "source": "emotional_resonance.json"
+      }
+    ]
   }
 ]

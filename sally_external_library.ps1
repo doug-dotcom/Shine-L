@@ -1,3 +1,101 @@
+# SHINE L - SALLY EXTERNAL SKILL LIBRARY AODS
+
+Clear-Host
+
+$ROOT = "C:\Shine_L"
+$SALLY = "$ROOT\agents\sally\sally.py"
+$SKILL_ROOT = "$ROOT\memory\skills"
+$SKILL_PACKS = "$SKILL_ROOT\library"
+$BACKUP = "$ROOT\backups\sally_external_skill_library_$(Get-Date -Format yyyyMMdd_HHmmss)"
+
+New-Item -ItemType Directory -Force -Path $BACKUP | Out-Null
+New-Item -ItemType Directory -Force -Path $SKILL_PACKS | Out-Null
+
+Copy-Item $SALLY "$BACKUP\sally_backup.py" -Force
+
+Write-Host "Sally backed up"
+Write-Host "Creating external skill files..."
+
+$skills = @(
+@{
+file="emotional_resonance.json"
+json='{
+  "name": "Emotional Resonance",
+  "category": "communication",
+  "status": "active",
+  "maturity": "developing",
+  "version": "1.0",
+  "description": "Respond with calm emotional attunement without over-validating or becoming emotionally inflated.",
+  "activation_cues": ["feel", "sad", "anxious", "overwhelmed", "tired", "emotional"],
+  "suppression_cues": ["fast mode", "just answer", "aods"],
+  "prompt_layer": "Use calm, grounded presence. Acknowledge emotion simply. Do not over-explain or over-reassure."
+}'
+},
+@{
+file="completion_cadence.json"
+json='{
+  "name": "Completion Cadence",
+  "category": "communication",
+  "status": "active",
+  "maturity": "unstable",
+  "version": "1.0",
+  "description": "Know when a response is complete and stop naturally without assistant-tail follow-up.",
+  "activation_cues": ["thanks", "great work", "good job", "anything else", "thoughts"],
+  "suppression_cues": [],
+  "prompt_layer": "End naturally when the answer has landed. Do not reopen the conversation with unnecessary questions."
+}'
+},
+@{
+file="reflection_depth.json"
+json='{
+  "name": "Reflection Depth",
+  "category": "reflection",
+  "status": "active",
+  "maturity": "developing",
+  "version": "1.0",
+  "description": "Generate real reflection by identifying changes, hidden patterns, operational lessons, and meaning.",
+  "activation_cues": ["reflect", "thoughts", "review", "what did you learn", "summary"],
+  "suppression_cues": ["fast mode", "aods", "quick"],
+  "prompt_layer": "Avoid generic coaching loops. Provide genuine new insight or state that there is nothing further to add."
+}'
+},
+@{
+file="inbox_triage.json"
+json='{
+  "name": "Inbox Triage",
+  "category": "executive",
+  "status": "active",
+  "maturity": "developing",
+  "version": "1.0",
+  "description": "Sort and summarize email into actionable, review, and low-signal lanes.",
+  "activation_cues": ["email", "emails", "gmail", "inbox", "emily"],
+  "suppression_cues": ["what do you think of emily", "thoughts on emily"],
+  "prompt_layer": "Only activate for genuine email operations. Do not let email context dominate unrelated conversation."
+}'
+},
+@{
+file="specialist_isolation.json"
+json='{
+  "name": "Specialist Isolation",
+  "category": "orchestration",
+  "status": "active",
+  "maturity": "early",
+  "version": "1.0",
+  "description": "Allow agents to assist without taking over Ls base identity.",
+  "activation_cues": ["agent", "routing", "orchestration", "specialist", "sally", "emily", "tegan"],
+  "suppression_cues": [],
+  "prompt_layer": "Specialists support L. They do not replace L. Return control to base L cognition after specialist use."
+}'
+}
+)
+
+foreach ($s in $skills) {
+    Set-Content -Path "$SKILL_PACKS\$($s.file)" -Value $s.json -Encoding UTF8
+}
+
+Write-Host "Skill files created"
+
+$sallyNew = @'
 import os
 import json
 from datetime import datetime
@@ -286,3 +384,25 @@ def handle_skill_request(message: str):
         return list_skills()
 
     return skill_audit()
+'@
+
+Set-Content $SALLY $sallyNew -Encoding UTF8
+
+Push-Location $ROOT
+
+python -c "from agents.sally.sally import list_skills, build_skill_prompt_layer; print(list_skills()); print(build_skill_prompt_layer('I am overwhelmed and need a short answer'))"
+
+Pop-Location
+
+Write-Host ""
+Write-Host "External Sally Skill Library installed"
+Write-Host ""
+Write-Host "Test:"
+Write-Host "Sally show skills"
+Write-Host "Sally activation audit"
+Write-Host "Sally show Reflection Depth"
+Write-Host ""
+Write-Host "Then:"
+Write-Host "git add ."
+Write-Host "git commit -m 'Externalize Sally skill library'"
+Write-Host "git push origin main"
