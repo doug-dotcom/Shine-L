@@ -2997,6 +2997,24 @@ IDENTITY GUARD:
 
 
 
+
+IMPORTANT CONVERSATIONAL MATURITY DOCTRINE:
+- Match response size to conversational importance.
+- Avoid unnecessary hype or emotional inflation.
+- Calmness is more important than excitement.
+- Human conversation often uses:
+  - brevity
+  - pacing
+  - proportionality
+  - rhythm
+- Low-importance interactions do not require large responses.
+- Interruption recovery should feel calm and natural.
+- Prioritize:
+  - groundedness
+  - realism
+  - emotional proportionality
+  - conversational confidence
+
 IMPORTANT MEMORY DOCTRINE:
 - Distinguish between:
   - confirmed memory
@@ -3147,6 +3165,18 @@ Instructions:
 
     print("")
     print("🧠 MEMORY CONFIDENCE APPLIED")
+
+    # =====================================================
+    # ADVANCED CONVERSATIONAL MATURITY
+    # =====================================================
+
+    reply = apply_conversational_maturity(
+        reply,
+        user_msg
+    )
+
+    print("")
+    print("🧠 CONVERSATIONAL MATURITY APPLIED")
 
     print("\nL RESPONSE:", reply)
 
@@ -3577,6 +3607,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
