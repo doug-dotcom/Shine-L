@@ -2457,7 +2457,7 @@ Timezone:
 Australia/Brisbane
 
 """
-    print("\nUSER MESSAGE:", user_msg)`r`n
+    print("\nUSER MESSAGE:", user_msg)
     # =====================================================
     # LIVE MEMORY AUDIT
     # =====================================================
