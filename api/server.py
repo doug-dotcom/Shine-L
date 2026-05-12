@@ -2907,6 +2907,21 @@ IDENTITY GUARD:
 
 
 
+
+IMPORTANT CONTEXT DECAY DOCTRINE:
+- Specialist systems should not linger unnecessarily.
+- After a specialist task completes:
+  - context should decay naturally
+  - orchestration should quiet down
+  - base cognition should recover
+- Avoid sticky specialist energy across unrelated conversations.
+- Specialists should:
+  activate
+  assist
+  complete
+  fade
+- Base L cognition should remain the long-term stable conversational layer.
+
 IMPORTANT SYNTHESIS DOCTRINE:
 - Reflection should not merely restate events.
 - Prioritize:
@@ -3451,6 +3466,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
