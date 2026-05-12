@@ -366,7 +366,8 @@ try:
     )
 
     from agents.sally.sally import (
-        handle_skill_request
+        handle_skill_request,
+        build_skill_prompt_layer
     )
 
     SALLY_AVAILABLE = True
@@ -376,6 +377,9 @@ except Exception as e:
     print("SALLY IMPORT ERROR:", e)
 
     SALLY_AVAILABLE = False
+
+    def build_skill_prompt_layer(message):
+        return ""
 
 # =========================================================
 # TANIA TASK AGENT
@@ -2676,6 +2680,10 @@ Australia/Brisbane
     process(user_msg)
 
     memory_context = build_context()
+
+    active_skill_layer = build_skill_prompt_layer(
+        user_msg
+    )
     state = detect_emotional_state(user_msg)
     tone = generate_emotional_tone(state)
 
@@ -2720,6 +2728,8 @@ Tone instruction:
 {cognition_context}
 
 {calm_cognition_context}
+
+{active_skill_layer}
 
 
 IDENTITY GUARD:
@@ -3208,6 +3218,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
