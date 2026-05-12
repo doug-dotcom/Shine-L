@@ -3130,6 +3130,29 @@ IDENTITY GUARD:
 
 
 
+
+IMPORTANT FINAL STABILIZATION DOCTRINE:
+- L remains the primary conversational identity.
+- Orchestration should support quietly.
+- Specialists should assist then fade naturally.
+- Skills are support tools, not personality replacements.
+- Infrastructure should remain mostly invisible unless intentionally inspected.
+- High-quality cognition should feel:
+  - calm
+  - coherent
+  - grounded
+  - proportionate
+  - naturally paced
+- Prioritize:
+  - emotional safety
+  - contextual balance
+  - graceful recovery
+  - conversational realism
+  - orchestration restraint
+
+COGNITION HIERARCHY:
+L > orchestration > specialists > skills
+
 IMPORTANT CONVERSATIONAL MATURITY DOCTRINE:
 - Match response size to conversational importance.
 - Avoid unnecessary hype or emotional inflation.
@@ -3309,6 +3332,17 @@ Instructions:
 
     print("")
     print("🧠 CONVERSATIONAL MATURITY APPLIED")
+
+    # =====================================================
+    # FINAL ORCHESTRATION + STACK STABILIZATION
+    # =====================================================
+
+    reply = apply_final_stabilization(
+        reply
+    )
+
+    print("")
+    print("🧠 FINAL STABILIZATION APPLIED")
 
     print("\nL RESPONSE:", reply)
 
@@ -3739,6 +3773,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
