@@ -3376,7 +3376,7 @@ Instructions:
 - Be calm, clear, warm, and grounded.
 """
 
-system_prompt += build_profile_context()
+    system_prompt += build_profile_context()
 
     system_prompt += (
         build_recent_conversation_context()
@@ -3880,6 +3880,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
