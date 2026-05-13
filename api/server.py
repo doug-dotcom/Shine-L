@@ -3256,7 +3256,7 @@ Australia/Brisbane
 
     natural_memory_continuity = build_natural_memory_injection(
         ranked_relational_memories
-    )`r`n
+    )
     # =====================================================
     # MEMORY CONFIDENCE + CONTRADICTION AWARENESS
     # =====================================================
