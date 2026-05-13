@@ -971,3 +971,119 @@ def extract_relational_memory(user_msg):
 
     return related[:5]
 
+
+
+
+# =====================================================
+# RELATIONAL MEMORY CONTINUITY V1
+# =====================================================
+
+def score_relational_memory(memory, user_msg):
+
+    score = 0
+
+    text = user_msg.lower()
+
+    fields = [
+
+        "who",
+        "what",
+        "where",
+        "when",
+        "outcome",
+        "emotion"
+
+    ]
+
+    for field in fields:
+
+        value = str(
+            memory.get(field, "")
+        ).lower()
+
+        if value and value in text:
+
+            score += 3
+
+    category = str(
+        memory.get("category", "")
+    ).lower()
+
+    if category and category in text:
+
+        score += 2
+
+    return score
+
+def rank_relational_memories(memories, user_msg):
+
+    ranked = []
+
+    for memory in memories:
+
+        item = dict(memory)
+
+        item["_score"] = score_relational_memory(
+            memory,
+            user_msg
+        )
+
+        ranked.append(item)
+
+    ranked.sort(
+        key=lambda x: x.get("_score", 0),
+        reverse=True
+    )
+
+    return ranked[:5]
+
+def build_natural_memory_injection(memories):
+
+    if not memories:
+
+        return ""
+
+    best = memories[0]
+
+    pieces = []
+
+    who = best.get("who")
+    where = best.get("where")
+    when = best.get("when")
+    outcome = best.get("outcome")
+
+    if who:
+        pieces.append(
+            "with " + str(who)
+        )
+
+    if where:
+        pieces.append(
+            "at " + str(where)
+        )
+
+    if when:
+        pieces.append(
+            str(when)
+        )
+
+    if outcome:
+        pieces.append(
+            "where the outcome was: "
+            + str(outcome)
+        )
+
+    if not pieces:
+
+        return ""
+
+    memory_line = (
+        "Relevant prior experience: "
+        + ", ".join(pieces)
+    )
+
+    return (
+        "\n\nNATURAL MEMORY CONTINUITY:\n"
+        + memory_line
+    )
+

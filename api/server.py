@@ -17,6 +17,8 @@ import base64
 import fitz
 
 from memory.memory_engine import (
+    build_natural_memory_injection,
+    rank_relational_memories,
     extract_relational_memory,
     build_relational_memory_context,
     build_full_memory_audit,
@@ -3241,7 +3243,20 @@ Australia/Brisbane
 
     relational_context = build_relational_memory_context(
         relational_memories
+    )`r`n
+    # =====================================================
+    # RELATIONAL MEMORY CONTINUITY
+    # =====================================================
+
+    ranked_relational_memories = rank_relational_memories(
+        relational_memories,
+        user_msg
     )
+
+    natural_memory_continuity = build_natural_memory_injection(
+        ranked_relational_memories
+    )
+
 
 
     active_skill_layer = build_skill_prompt_layer(
@@ -3312,6 +3327,27 @@ IDENTITY GUARD:
 
 
 
+
+
+IMPORTANT MEMORY CONTINUITY DOCTRINE:
+- Human memory is experience-oriented.
+- Prior experiences should be recalled naturally.
+- Memories should feel:
+  - relational
+  - contextual
+  - continuous
+  - emotionally connected
+- Avoid:
+  - raw database dumping
+  - excessive memory listing
+  - mechanical retrieval behavior
+- Memory continuity should subtly support conversation.
+- Prior experiences may include:
+  - who was involved
+  - where it happened
+  - when it happened
+  - what the outcome was
+  - emotional continuity
 
 IMPORTANT RELATIONAL MEMORY DOCTRINE:
 - Human memory is highly associative.
@@ -3974,6 +4010,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
