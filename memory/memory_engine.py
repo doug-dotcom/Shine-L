@@ -1186,3 +1186,131 @@ def build_memory_confidence_context(
         + "\n".join(context)
     )
 
+
+
+
+# =====================================================
+# CONTEXT WEIGHTING ENGINE V1
+# =====================================================
+
+EMOTIONAL_TERMS = [
+
+    "sad",
+    "stressed",
+    "overwhelmed",
+    "vulnerable",
+    "hurt",
+    "anxious",
+    "depressed",
+    "fear",
+    "scared"
+
+]
+
+REFLECTIVE_TERMS = [
+
+    "thinking",
+    "reflecting",
+    "lesson",
+    "insight",
+    "realization",
+    "understanding",
+    "processing"
+
+]
+
+FUNCTIONAL_TERMS = [
+
+    "email",
+    "calendar",
+    "task",
+    "money",
+    "invoice",
+    "schedule"
+
+]
+
+def detect_primary_context(user_msg):
+
+    text = user_msg.lower()
+
+    emotional_score = 0
+    reflective_score = 0
+    functional_score = 0
+
+    for term in EMOTIONAL_TERMS:
+
+        if term in text:
+            emotional_score += 1
+
+    for term in REFLECTIVE_TERMS:
+
+        if term in text:
+            reflective_score += 1
+
+    for term in FUNCTIONAL_TERMS:
+
+        if term in text:
+            functional_score += 1
+
+    scores = {
+
+        "emotional": emotional_score,
+        "reflective": reflective_score,
+        "functional": functional_score
+
+    }
+
+    primary = max(
+        scores,
+        key=scores.get
+    )
+
+    return {
+        "primary_context": primary,
+        "scores": scores
+    }
+
+def build_context_weighting_layer(user_msg):
+
+    result = detect_primary_context(
+        user_msg
+    )
+
+    primary = result.get(
+        "primary_context",
+        "normal"
+    )
+
+    scores = result.get(
+        "scores",
+        {}
+    )
+
+    layer = []
+
+    layer.append(
+        "primary conversational context: "
+        + primary
+    )
+
+    layer.append(
+        "emotional score: "
+        + str(scores.get("emotional", 0))
+    )
+
+    layer.append(
+        "reflective score: "
+        + str(scores.get("reflective", 0))
+    )
+
+    layer.append(
+        "functional score: "
+        + str(scores.get("functional", 0))
+    )
+
+    return (
+        "\n\nCONTEXT WEIGHTING:\n"
+        + "\n".join(layer)
+    )
+

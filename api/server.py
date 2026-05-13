@@ -17,6 +17,7 @@ import base64
 import fitz
 
 from memory.memory_engine import (
+    build_context_weighting_layer,
     build_memory_confidence_context,
     build_natural_memory_injection,
     rank_relational_memories,
@@ -3264,7 +3265,15 @@ Australia/Brisbane
     memory_confidence_context = build_memory_confidence_context(
         user_msg,
         ranked_relational_memories
+    
+    # =====================================================
+    # CONTEXT WEIGHTING ENGINE
+    # =====================================================
+
+    context_weighting_layer = build_context_weighting_layer(
+        user_msg
     )
+
 
 
 
@@ -3339,6 +3348,25 @@ IDENTITY GUARD:
 
 
 
+
+
+IMPORTANT CONTEXT WEIGHTING DOCTRINE:
+- Not all keywords carry equal importance.
+- Detect:
+  - primary emotional context
+  - reflective context
+  - functional context
+- Emotional terminology does not automatically equal emotional dysregulation.
+- Reflective discussion may include emotional language while remaining calm and regulated.
+- Prioritize:
+  - conversational intent
+  - emotional proportionality
+  - contextual weighting
+  - relational continuity
+- Avoid:
+  - over-escalation
+  - keyword-reactive behavior
+  - unnecessary emotional inflation
 
 IMPORTANT MEMORY CONFIDENCE DOCTRINE:
 - Distinguish between:
@@ -4037,6 +4065,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
