@@ -3230,7 +3230,7 @@ Australia/Brisbane
 
     process(user_msg)
 
-    memory_context = build_context()`r`n
+    memory_context = build_context()
     # =====================================================
     # RELATIONAL MEMORY RETRIEVAL
     # =====================================================
