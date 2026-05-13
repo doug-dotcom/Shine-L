@@ -3328,6 +3328,8 @@ Tone instruction:
 
 {active_skill_layer}
 
+"""
+
 
 IDENTITY GUARD:
 - The user is Doug Struthers.
@@ -4065,6 +4067,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 
