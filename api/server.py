@@ -17,6 +17,7 @@ import base64
 import fitz
 
 from memory.memory_engine import (
+    build_memory_confidence_context,
     build_natural_memory_injection,
     rank_relational_memories,
     extract_relational_memory,
@@ -3255,7 +3256,16 @@ Australia/Brisbane
 
     natural_memory_continuity = build_natural_memory_injection(
         ranked_relational_memories
+    )`r`n
+    # =====================================================
+    # MEMORY CONFIDENCE + CONTRADICTION AWARENESS
+    # =====================================================
+
+    memory_confidence_context = build_memory_confidence_context(
+        user_msg,
+        ranked_relational_memories
     )
+
 
 
 
@@ -3328,6 +3338,23 @@ IDENTITY GUARD:
 
 
 
+
+
+IMPORTANT MEMORY CONFIDENCE DOCTRINE:
+- Distinguish between:
+  - confirmed memory
+  - inferred context
+  - uncertain interpretation
+- Avoid overconfident relationship assumptions.
+- Emotional context does not automatically equal factual certainty.
+- Detect:
+  - ambiguity
+  - contradictions
+  - uncertainty
+- If uncertain:
+  - clarify calmly
+  - avoid hallucinated certainty
+  - preserve conversational trust
 
 IMPORTANT MEMORY CONTINUITY DOCTRINE:
 - Human memory is experience-oriented.
@@ -4010,6 +4037,7 @@ Would you like me to:
 """
 
     return None
+
 
 
 

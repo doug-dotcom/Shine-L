@@ -1087,3 +1087,102 @@ def build_natural_memory_injection(memories):
         + memory_line
     )
 
+
+
+
+# =====================================================
+# MEMORY CONFIDENCE + CONTRADICTION AWARENESS V1
+# =====================================================
+
+def detect_possible_contradiction(user_msg, memories):
+
+    text = user_msg.lower()
+
+    contradictions = []
+
+    for memory in memories:
+
+        memory_json = json.dumps(
+            memory
+        ).lower()
+
+        # Child count contradictions
+        if "child" in text or "daughter" in text or "son" in text:
+
+            if (
+                "another child" in text
+                and "children" in memory_json
+            ):
+
+                contradictions.append(
+                    "possible family count mismatch"
+                )
+
+        # Pet confusion
+        if "dog" in text or "cat" in text:
+
+            if (
+                "daughter" in memory_json
+                or "son" in memory_json
+            ):
+
+                contradictions.append(
+                    "possible relationship ambiguity"
+                )
+
+    return contradictions
+
+def calculate_memory_confidence_level(memories):
+
+    if not memories:
+        return "low"
+
+    if len(memories) >= 5:
+        return "high"
+
+    if len(memories) >= 2:
+        return "medium"
+
+    return "low"
+
+def build_memory_confidence_context(
+    user_msg,
+    memories
+):
+
+    confidence = calculate_memory_confidence_level(
+        memories
+    )
+
+    contradictions = detect_possible_contradiction(
+        user_msg,
+        memories
+    )
+
+    context = []
+
+    context.append(
+        "memory confidence: " + confidence
+    )
+
+    if contradictions:
+
+        context.append(
+            "possible ambiguity detected"
+        )
+
+        for item in contradictions:
+
+            context.append(
+                "- " + item
+            )
+
+    if not context:
+
+        return ""
+
+    return (
+        "\n\nMEMORY CONFIDENCE CONTEXT:\n"
+        + "\n".join(context)
+    )
+
