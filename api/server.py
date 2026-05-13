@@ -3243,7 +3243,7 @@ Australia/Brisbane
 
     relational_context = build_relational_memory_context(
         relational_memories
-    )`r`n
+    )
     # =====================================================
     # RELATIONAL MEMORY CONTINUITY
     # =====================================================
