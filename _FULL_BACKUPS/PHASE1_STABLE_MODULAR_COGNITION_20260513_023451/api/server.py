@@ -17,8 +17,6 @@ import base64
 import fitz
 
 from memory.memory_engine import (
-    extract_relational_memory,
-    build_relational_memory_context,
     build_full_memory_audit,
     get_memory_record_count,
     process,
@@ -3230,19 +3228,7 @@ Australia/Brisbane
 
     process(user_msg)
 
-    memory_context = build_context()`r`n
-    # =====================================================
-    # RELATIONAL MEMORY RETRIEVAL
-    # =====================================================
-
-    relational_memories = extract_relational_memory(
-        user_msg
-    )
-
-    relational_context = build_relational_memory_context(
-        relational_memories
-    )
-
+    memory_context = build_context()
 
     active_skill_layer = build_skill_prompt_layer(
         user_msg
@@ -3311,26 +3297,6 @@ IDENTITY GUARD:
 
 
 
-
-
-IMPORTANT RELATIONAL MEMORY DOCTRINE:
-- Human memory is highly associative.
-- Memories should connect:
-  - who
-  - what
-  - where
-  - when
-  - outcome
-  - emotional continuity
-- Prioritize relational continuity over isolated fact retrieval.
-- Relevant prior experiences should be woven naturally into conversation.
-- Memory should feel:
-  - relational
-  - contextual
-  - emotionally continuous
-rather than:
-  - database-like
-  - mechanically retrieved
 
 IMPORTANT FINAL STABILIZATION DOCTRINE:
 - L remains the primary conversational identity.
@@ -3974,7 +3940,6 @@ Would you like me to:
 """
 
     return None
-
 
 
 
